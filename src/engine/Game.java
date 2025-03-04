@@ -19,7 +19,7 @@ public class Game implements GameManager {
     @SuppressWarnings("unused")
     private int turn;
 
-    private static final ArrayList<Colour> generateColourOrder(){
+    private static final ArrayList<Colour> generateColourOrder() {
         ArrayList<Colour> colourOrder = new ArrayList<>();
         Colour blue = Colour.BLUE;
         Colour green = Colour.GREEN;
@@ -33,27 +33,27 @@ public class Game implements GameManager {
         return colourOrder;
     }
 
-    public Game(String playerName) throws IOException{
+    public Game(String playerName) throws IOException {
         ArrayList<Colour> colourOrder = generateColourOrder();
-        this.board=new Board(colourOrder,this);
+        this.board = new Board(colourOrder, this);
         Deck.loadCardPool(board, this);
         players = new ArrayList<Player>();
-        players.add(new Player()); //pass paremeters and add CPU
-        //ArrayList<Card> a = Deck.drawCards() , setHand for each player
-        this.currentPlayerIndex=0;
-        this.turn=0;
-        this.firePit=new ArrayList<Card>();
+        players.add(new Player()); // pass paremeters and add CPU
+        // ArrayList<Card> a = Deck.drawCards() , setHand for each player
+        this.currentPlayerIndex = 0;
+        this.turn = 0;
+        this.firePit = new ArrayList<Card>();
     }
 
     public Board getBoard() {
-        return this.board;
+        return board;
     }
 
     public ArrayList<Player> getPlayers() {
-        return this.players;
+        return players;
     }
 
     public ArrayList<Card> getFirePit() {
-        return this.firePit;
+        return firePit;
     }
 }
