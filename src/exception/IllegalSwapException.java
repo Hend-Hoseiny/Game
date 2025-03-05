@@ -1,6 +1,6 @@
 package exception;
 
-public class IllegalSwapException extends GameException {
+public class IllegalSwapException extends ActionException {
     
     //constructors
     public IllegalSwapException() {
