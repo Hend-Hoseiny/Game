@@ -1,6 +1,7 @@
 package model.card;
 
 import engine.GameManager;
+import engine.board.Board;
 import engine.board.BoardManager;
 import model.card.standard.*;
 import model.card.wild.*;
@@ -13,27 +14,27 @@ public class Deck {
     private static ArrayList<Card> cardsPool = new ArrayList<Card>();
 
     public static void loadCardPool(BoardManager boardManager, GameManager gameManager) throws IOException {
-        Scanner sc = new Scanner(new File(CARDS_FILE));
-        while (sc.hasNext()) {
-            String row = sc.nextLine();
+        Scanner lineReader = new Scanner(new File(CARDS_FILE));
+        while (lineReader.hasNext()) {
+            String row = lineReader.nextLine();
 
-            Scanner lineReader = new Scanner(row);
-            lineReader.useDelimiter(",");
+            Scanner sc = new Scanner(row);
+            sc.useDelimiter(",");
 
-            int code = lineReader.nextInt();
-            int frequency = lineReader.nextInt();
-            String name = lineReader.next();
-            String description = lineReader.next();
+            int code = sc.nextInt();
+            int frequency = sc.nextInt();
+            String name = sc.next();
+            String description = sc.next();
             int rank = -1;
             String suit = "";
             if (code == 14 || code == 15) {
-                description += lineReader.next() + lineReader.next();
-                lineReader.next();
+                description += sc.next() + sc.next();
+                sc.next();
                 description = description.substring(1);
                 description = description.substring(0, description.length() - 1);
             } else {
-                rank = lineReader.nextInt();
-                suit = lineReader.next();
+                rank = sc.nextInt();
+                suit = sc.next();
             }
             switch (code) {
                 case 0:
@@ -103,9 +104,9 @@ public class Deck {
                     }
                     break;
             }
-            lineReader.close();
+            sc.close();
         }
-        sc.close();
+        lineReader.close();
     }
 
     public static ArrayList<Card> drawCards(){
@@ -115,7 +116,6 @@ public class Deck {
             result.add(cardsPool.remove(0));
         return result;
     } 
-    
    
 }
 
