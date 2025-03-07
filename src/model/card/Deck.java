@@ -1,7 +1,6 @@
 package model.card;
 
 import engine.GameManager;
-// import engine.board.Board;
 import engine.board.BoardManager;
 import model.card.standard.*;
 import model.card.wild.*;
