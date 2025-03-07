@@ -4,7 +4,9 @@ import model.player.Marble;
 
 public class Cell {
     // A class representing the Cells available on the board.
-    private Marble marble; // all attributes are read and write
+    // all attributes are read and write
+    
+    private Marble marble; 
     private CellType cellType;
     private boolean trap;
 

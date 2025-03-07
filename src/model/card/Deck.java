@@ -1,7 +1,7 @@
 package model.card;
 
 import engine.GameManager;
-import engine.board.Board;
+// import engine.board.Board;
 import engine.board.BoardManager;
 import model.card.standard.*;
 import model.card.wild.*;
@@ -11,13 +11,13 @@ import java.io.*;
 
 public class Deck {
     private static final String CARDS_FILE = "Cards.csv";
-    private static ArrayList<Card> cardsPool = new ArrayList<Card>();
+    private static ArrayList<Card> cardsPool;
 
     public static void loadCardPool(BoardManager boardManager, GameManager gameManager) throws IOException {
+        cardsPool = new ArrayList<Card>();
         Scanner lineReader = new Scanner(new File(CARDS_FILE));
         while (lineReader.hasNext()) {
             String row = lineReader.nextLine();
-
             Scanner sc = new Scanner(row);
             sc.useDelimiter(",");
 
@@ -28,10 +28,13 @@ public class Deck {
             int rank = -1;
             String suit = "";
             if (code == 14 || code == 15) {
-                description += sc.next() + sc.next();
-                sc.next();
-                description = description.substring(1);
-                description = description.substring(0, description.length() - 1);
+                while(sc.hasNext()){
+                    description+=sc.next();
+                }
+                if(description.charAt(0)=='\"')
+                    description = description.substring(1);
+                if(description.charAt(description.length()-1)=='\"')
+                    description = description.substring(0, description.length() - 1);
             } else {
                 rank = sc.nextInt();
                 suit = sc.next();
@@ -115,7 +118,7 @@ public class Deck {
         for(int i = 0;i<4;i++)
             result.add(cardsPool.remove(0));
         return result;
-    } 
-   
+    }    
+
 }
 

@@ -10,9 +10,9 @@ public class Standard extends Card {
     // Seven, Ten
     // attributes are read only
 
-    private final int rank; // An int representing the rank (number) of a standard card.
+    private final int rank; 
 
-    private final Suit suit; // An enum representing the suit of a standard card
+    private final Suit suit; 
 
     public Standard(String name, String description, int rank, Suit suit, BoardManager boardManager,
             GameManager gameManager) {
