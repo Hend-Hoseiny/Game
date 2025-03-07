@@ -37,7 +37,7 @@ public class Board implements BoardManager{
         }
     }
 
-    public void assignTrapCell() {
+    private void assignTrapCell() {
         Random random = new Random();
         while(true){
             int index = random.nextInt(100);

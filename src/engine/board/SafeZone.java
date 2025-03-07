@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import model.Colour;
 
 public class SafeZone {
-    // A class representing any Safe Zone available on the board.
+    // A class representing any Safe Zone
     // attributes are read only
+    
     private final Colour colour;
     private final ArrayList<Cell> cells;
 
