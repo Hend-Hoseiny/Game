@@ -155,7 +155,7 @@ public class Game implements GameManager {
     }
 
     public void fieldMarble() throws CannotFieldException, IllegalDestroyException{
-
+        
     }
 
     public void discardCard(Colour colour) throws CannotDiscardException{
