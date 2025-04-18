@@ -1,10 +1,14 @@
 package engine;
 
-import engine.board.Board;
+import engine.board.*;
+import exception.InvalidCardException;
+import exception.InvalidMarbleException;
+import exception.SplitOutOfRangeException;
 import model.Colour;
 import model.card.Card;
 import model.card.Deck;
 import model.player.CPU;
+import model.player.Marble;
 import model.player.Player;
 
 import java.io.*;
@@ -74,4 +78,44 @@ public class Game implements GameManager {
     public ArrayList<Card> getFirePit() {
         return firePit;
     }
+
+    public void selectCard(Card card) throws InvalidCardException{
+        players.get(currentPlayerIndex).selectCard(card);
+    }
+
+    public void selectMarble(Marble marble) throws InvalidMarbleException{
+        players.get(currentPlayerIndex).selectMarble(marble);
+    }
+
+    public void deselectAll(){
+        players.get(currentPlayerIndex).deselectAll();
+    }
+
+    public void editSplitDistance(int splitDistance) throws SplitOutOfRangeException{
+        if(splitDistance<1 || splitDistance>6)
+            throw new SplitOutOfRangeException("The provided value is outside the appropriate 1-6 range.");
+        else
+            board.setSplitDistance(splitDistance);
+    }
+
+    public Colour checkWin(){
+        for(int i=0 ; i<board.getSafeZones().size() ; i++){
+            SafeZone s = board.getSafeZones().get(i);
+            if(checkAllOccupied(s.getCells()))
+                return s.getColour();
+        }
+        return null;
+    }
+    private boolean checkAllOccupied(ArrayList<Cell> arr){
+        for(int i=0 ; i<arr.size() ; i++){
+            if (arr.get(i).getMarble()==null)
+                return false;
+        }
+        return true;
+    }
+
+
+
+
+
 }
