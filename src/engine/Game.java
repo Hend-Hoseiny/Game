@@ -1,12 +1,18 @@
 package engine;
 
 import engine.board.*;
+import exception.CannotDiscardException;
+import exception.CannotFieldException;
+import exception.GameException;
+import exception.IllegalDestroyException;
 import exception.InvalidCardException;
 import exception.InvalidMarbleException;
 import exception.SplitOutOfRangeException;
 import model.Colour;
 import model.card.Card;
 import model.card.Deck;
+import model.card.standard.Standard;
+import model.card.standard.Suit;
 import model.player.CPU;
 import model.player.Marble;
 import model.player.Player;
@@ -79,6 +85,8 @@ public class Game implements GameManager {
         return firePit;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------------
+
     public void selectCard(Card card) throws InvalidCardException{
         players.get(currentPlayerIndex).selectCard(card);
     }
@@ -98,6 +106,34 @@ public class Game implements GameManager {
             board.setSplitDistance(splitDistance);
     }
 
+    public boolean canPlayTurn(){
+        ArrayList<Card> currentHand = players.get(currentPlayerIndex).getHand();
+        return currentHand.size()+turn==4;
+    }
+
+    public void playPlayerTurn() throws GameException{
+        players.get(currentPlayerIndex).play();
+    }
+
+    public void endPlayerTurn(){
+        Player currentPlayer = players.get(currentPlayerIndex);
+        Card selectedCard = currentPlayer.getSelectedCard(); 
+        currentPlayer.getHand().remove(selectedCard);
+        firePit.add(selectedCard);
+        currentPlayer.deselectAll();
+        currentPlayerIndex=(currentPlayerIndex+1)%4;
+        if(currentPlayerIndex==0)
+            turn=(turn+1)%4;
+        if(turn==0)
+            for(Player p:players){
+                if(Deck.getPoolSize()<4){
+                    Deck.refillPool(firePit);
+                    firePit.clear();
+                }
+                p.setHand(Deck.drawCards());
+            }
+    } 
+
     public Colour checkWin(){
         for(int i=0 ; i<board.getSafeZones().size() ; i++){
             SafeZone s = board.getSafeZones().get(i);
@@ -113,6 +149,51 @@ public class Game implements GameManager {
         }
         return true;
     }
+
+    public void sendHome(Marble marble){
+        players.get(currentPlayerIndex).regainMarble(marble);
+    }
+
+    public void fieldMarble() throws CannotFieldException, IllegalDestroyException{
+
+    }
+
+    public void discardCard(Colour colour) throws CannotDiscardException{
+        for(Player p:players){
+            if(p.getColour()==colour){
+                ArrayList<Card> currentHand = new ArrayList<Card>();
+                currentHand.addAll(p.getHand());
+                if(currentHand.size()==0)
+                    throw new CannotDiscardException("Player has no cards in hand to be discarded");
+                else{
+                    Collections.shuffle(currentHand);
+                    Card discardedCard = currentHand.get(0);
+                    firePit.add(discardedCard);
+                    p.getHand().remove(discardedCard);
+                }
+            }  
+        }
+    }
+
+    public void discardCard() throws CannotDiscardException{
+        Random r = new Random();
+        int index=r.nextInt(4);
+        while(index==currentPlayerIndex)
+            index=r.nextInt(4);
+        Colour currentColour = players.get(index).getColour();
+        discardCard(currentColour);
+    }
+
+    public Colour getActivePlayerColour(){
+        return players.get(currentPlayerIndex).getColour();
+    }
+
+    public Colour getNextPlayerColour(){
+        int index = (currentPlayerIndex+1)%4;
+        return players.get(index).getColour();
+    }
+
+    
 
 
 

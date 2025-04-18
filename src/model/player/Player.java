@@ -2,7 +2,9 @@ package model.player;
 
 import java.util.ArrayList;
 
+import exception.GameException;
 import exception.InvalidCardException;
+import exception.InvalidMarbleException;
 import model.Colour;
 import model.card.*;
 import model.card.standard.Standard;
@@ -53,6 +55,7 @@ public class Player {
         return selectedCard;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     public void regainMarble(Marble marble){
         marbles.add(marble);        
     }
@@ -64,20 +67,31 @@ public class Player {
     }
 
     public void selectCard(Card card) throws InvalidCardException{
-        if(hand.contains(card))
+        if(hand.contains(card)){
             selectedCard=card;
+        }
         else
             throw new InvalidCardException("The card does not belong to the player's hand.");
     }
 
-    public static void main(String[] args) throws InvalidCardException {
-        Player x = new Player("ali" , Colour.BLUE);
-        for(int i=0 ; i<x.marbles.size(); i++)
-            System.out.println(x.marbles.get(i).getColour());
-        // x.selectCard(new Standard("ace", "bla", 0, Suit.CLUB, null, null));
-        int y = 0;
-        System.out.println(5/y);
+    public void selectMarble(Marble marble) throws InvalidMarbleException{
+        if(selectedMarbles.size()==2)
+            throw new InvalidMarbleException("You are trying to select more than 2 marbles.");
+        else
+            selectedMarbles.add(marble);
     }
+
+    public void deselectAll(){
+        selectedCard = null;
+        selectedMarbles.clear();
+    }
+
+    public void play() throws GameException{
+
+    }
+
+
+   
 
 
 
