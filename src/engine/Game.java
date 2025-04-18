@@ -1,10 +1,14 @@
 package engine;
 
 import engine.board.Board;
+import exception.CannotDiscardException;
+import exception.CannotFieldException;
+import exception.IllegalDestroyException;
 import model.Colour;
 import model.card.Card;
 import model.card.Deck;
 import model.player.CPU;
+import model.player.Marble;
 import model.player.Player;
 
 import java.io.*;
@@ -73,5 +77,41 @@ public class Game implements GameManager {
 
     public ArrayList<Card> getFirePit() {
         return firePit;
+    }
+
+    @Override
+    public void sendHome(Marble marble) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendHome'");
+    }
+
+    @Override
+    public void fieldMarble() throws CannotFieldException, IllegalDestroyException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'fieldMarble'");
+    }
+
+    @Override
+    public void discardCard(Colour colour) throws CannotDiscardException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'discardCard'");
+    }
+
+    @Override
+    public void discardCard() throws CannotDiscardException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'discardCard'");
+    }
+
+    @Override
+    public Colour getActivePlayerColour() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getActivePlayerColour'");
+    }
+
+    @Override
+    public Colour getNextPlayerColour() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getNextPlayerColour'");
     }
 }
