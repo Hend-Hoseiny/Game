@@ -1,5 +1,9 @@
 package engine;
 
+
+import exception.CannotDiscardException;
+import exception.CannotFieldException;
+import exception.IllegalDestroyException;
 import engine.board.*;
 import exception.InvalidCardException;
 import exception.InvalidMarbleException;
@@ -79,6 +83,7 @@ public class Game implements GameManager {
         return firePit;
     }
 
+
     public void selectCard(Card card) throws InvalidCardException{
         players.get(currentPlayerIndex).selectCard(card);
     }
@@ -113,9 +118,5 @@ public class Game implements GameManager {
         }
         return true;
     }
-
-
-
-
 
 }
