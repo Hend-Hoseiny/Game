@@ -28,11 +28,13 @@ public class Deck {
             String suit = "";
             if (code == 14 || code == 15) {
                 while(sc.hasNext()){
-                    description+=sc.next();
+                    description+=","+sc.next();
                 }
                 if(description.charAt(0)=='\"')
                     description = description.substring(1);
                 if(description.charAt(description.length()-1)=='\"')
+                    description = description.substring(0, description.length() - 1);
+                while(description.charAt(description.length()-1)==',')
                     description = description.substring(0, description.length() - 1);
             } else {
                 rank = sc.nextInt();

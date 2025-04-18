@@ -1,9 +1,13 @@
 package engine;
 
-import engine.board.Board;
+
 import exception.CannotDiscardException;
 import exception.CannotFieldException;
 import exception.IllegalDestroyException;
+import engine.board.*;
+import exception.InvalidCardException;
+import exception.InvalidMarbleException;
+import exception.SplitOutOfRangeException;
 import model.Colour;
 import model.card.Card;
 import model.card.Deck;
@@ -79,39 +83,40 @@ public class Game implements GameManager {
         return firePit;
     }
 
-    @Override
-    public void sendHome(Marble marble) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'sendHome'");
+
+    public void selectCard(Card card) throws InvalidCardException{
+        players.get(currentPlayerIndex).selectCard(card);
     }
 
-    @Override
-    public void fieldMarble() throws CannotFieldException, IllegalDestroyException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fieldMarble'");
+    public void selectMarble(Marble marble) throws InvalidMarbleException{
+        players.get(currentPlayerIndex).selectMarble(marble);
     }
 
-    @Override
-    public void discardCard(Colour colour) throws CannotDiscardException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'discardCard'");
+    public void deselectAll(){
+        players.get(currentPlayerIndex).deselectAll();
     }
 
-    @Override
-    public void discardCard() throws CannotDiscardException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'discardCard'");
+    public void editSplitDistance(int splitDistance) throws SplitOutOfRangeException{
+        if(splitDistance<1 || splitDistance>6)
+            throw new SplitOutOfRangeException("The provided value is outside the appropriate 1-6 range.");
+        else
+            board.setSplitDistance(splitDistance);
     }
 
-    @Override
-    public Colour getActivePlayerColour() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getActivePlayerColour'");
+    public Colour checkWin(){
+        for(int i=0 ; i<board.getSafeZones().size() ; i++){
+            SafeZone s = board.getSafeZones().get(i);
+            if(checkAllOccupied(s.getCells()))
+                return s.getColour();
+        }
+        return null;
+    }
+    private boolean checkAllOccupied(ArrayList<Cell> arr){
+        for(int i=0 ; i<arr.size() ; i++){
+            if (arr.get(i).getMarble()==null)
+                return false;
+        }
+        return true;
     }
 
-    @Override
-    public Colour getNextPlayerColour() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getNextPlayerColour'");
-    }
 }
