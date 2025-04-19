@@ -159,7 +159,13 @@ public class Game implements GameManager {
     }
 
     public void fieldMarble() throws CannotFieldException, IllegalDestroyException{
-        
+        Player currentPlayer = players.get(currentPlayerIndex);
+        ArrayList<Marble> currentHome = currentPlayer.getMarbles();
+        if(currentHome.isEmpty())
+            throw new CannotFieldException("Player has no marbles in home zone");
+        Marble currentMarble = currentHome.get(0);
+        board.sendToBase(currentMarble);
+        currentHome.remove(currentMarble);
     }
 
     public void discardCard(Colour colour) throws CannotDiscardException{
