@@ -29,5 +29,7 @@ public class Standard extends Card {
     public Suit getSuit() {
         return suit;
     }
+    
+    
 
 }
