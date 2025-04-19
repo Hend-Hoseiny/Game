@@ -1,5 +1,8 @@
 package model.card.standard;
-
+import java.util.ArrayList;
+import exception.*;
+import model.Colour;
+import model.player.*;
 import engine.GameManager;
 import engine.board.BoardManager;
 
@@ -16,7 +19,7 @@ public class Queen extends Standard {
     	Colour playerColor = GameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
     	
     	if(marbles.size() == 1){
-    		Colour givenColor = marbles.get(0).getColor();
+    		Colour givenColor = marbles.get(0).getColour();
 	    	if (playerColor.equals(givenColor)){
 	    		
 	    		return true;
@@ -26,10 +29,10 @@ public class Queen extends Standard {
 	    	}
     	}
     	if (marbles.size() == 0){
-    		return true
+    		return true;
     	}
     	else{
-    		return false
+    		return false;
     	}
     	
     }

@@ -1,5 +1,9 @@
 package model.card.wild;
 
+import java.util.ArrayList;
+import exception.*;
+import model.Colour;
+import model.player.*;
 import engine.GameManager;
 import engine.board.BoardManager;
 
@@ -11,7 +15,7 @@ public class Burner extends Wild {
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
     	Colour playerColor = GameManager.getActivePlayerColour(); 
     	if(marbles.size() == 1){
-    	Colour givenColor = marbles.get(0).getColor();
+    	Colour givenColor = marbles.get(0).getColour();
     	if (!playerColor.equals(givenColor){
     		return true;
     	}}
