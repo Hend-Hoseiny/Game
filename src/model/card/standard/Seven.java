@@ -29,7 +29,7 @@ public class Seven extends Standard {
         		return true;
         	}
         	}
-     	else{return false;}
+     	return false;
     	
     }
     @Override
@@ -43,8 +43,8 @@ public class Seven extends Standard {
 
             if (marbles.size() == 2) {
                
-                boardManager.moveBy(marbles.get(0), splitDistance, false); // how do i decide the split distance?
-                boardManager.moveBy(marbles.get(1), 7 - splitDistance, false);
+                boardManager.moveBy(marbles.get(0), boardManager.getSplitDistance(), false); // how do i decide the split distance?
+                boardManager.moveBy(marbles.get(1), 7 - boardManager.getSplitDistance(), false);
             } else {
                 
                 boardManager.moveBy(marbles.get(0), 7 , false);
@@ -55,4 +55,4 @@ public class Seven extends Standard {
     }
 
 
-}
+
