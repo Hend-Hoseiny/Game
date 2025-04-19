@@ -1,5 +1,8 @@
 package model.card.standard;
-
+import java.util.ArrayList;
+import exception.*;
+import model.Colour;
+import model.player.*;
 import engine.GameManager;
 import engine.board.BoardManager;
 
@@ -14,9 +17,9 @@ public class Jack extends Standard {
 
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
     	Colour playerColor = GameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
-    	
+    	Colour givenColor1 = marbles.get(0).getColour();
     	if(marbles.size() == 1){
-	    	if (playerColor.equals(givenColor)){
+	    	if (playerColor.equals(givenColor1)){
 	    		return true;
 	    	}
 	    	else{
@@ -24,8 +27,8 @@ public class Jack extends Standard {
 	    	}
     	}
     	if (marbles.size() == 2){
-    		Colour givenColor1 = marbles.get(0).getColor();
-    		Colour givenColor2 = marbles.get(1).getColor();
+    		
+    		Colour givenColor2 = marbles.get(1).getColour();
     	 if (playerColor.equals(givenColor1)&& !(playerColor.equals(givenColor2)) ){
     		 return true;
     		 }
