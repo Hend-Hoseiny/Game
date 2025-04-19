@@ -17,7 +17,7 @@ public class King extends Standard {
 
     @Override
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = GameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
+    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
     
     	if(marbles.size() == 1){
     		Colour givenColor = marbles.get(0).getColour();
@@ -29,10 +29,10 @@ public class King extends Standard {
 	    	}
     	}
     	if (marbles.size() == 0){
-    		return true
+    		return true;
     	}
     	else{
-    		return false
+    		return false;
     	}
     	
     }
@@ -46,8 +46,6 @@ public class King extends Standard {
         if (!validateMarbleColours(marbles)) {
             throw new InvalidMarbleException("King can only move own marbles");
         }
-
-        try {
             if (marbles.isEmpty()) {
                 
                 gameManager.fieldMarble();
@@ -55,13 +53,7 @@ public class King extends Standard {
               
                 boardManager.moveBy(marbles.get(0), 13, true); 
             }
-        } catch (CannotFieldException e) {
-            throw new ActionException("King cannot field marble: " + e.getMessage(), e);
-        } catch (IllegalMovementException e) {
-            throw new ActionException("King movement blocked: " + e.getMessage(), e);
-        } catch (IllegalDestroyException e) {
-            throw new ActionException("King destroy conflict: " + e.getMessage(), e);
-        }
+      
     }
 
 }

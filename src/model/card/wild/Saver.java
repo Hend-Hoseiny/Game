@@ -20,11 +20,9 @@ public class Saver extends Wild {
             throw new InvalidMarbleException("Saver can only save your marbles");
         }
 
-        try {
+       
             boardManager.sendToSafe(marbles.get(0)); 
-        } catch (InvalidMarbleException e) {
-            throw new ActionException("Save failed: " + e.getMessage(), e);
-        }
+ 
     }
 
 }

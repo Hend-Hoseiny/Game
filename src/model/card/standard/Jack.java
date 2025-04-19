@@ -16,15 +16,11 @@ public class Jack extends Standard {
     @Override
 
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = GameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
+    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
     	Colour givenColor1 = marbles.get(0).getColour();
-    	if(marbles.size() == 1){
-	    	if (playerColor.equals(givenColor1)){
+    	if(marbles.size() == 1 && playerColor.equals(givenColor1) ){
 	    		return true;
-	    	}
-	    	else{
-	    		return false;
-	    	}
+
     	}
     	if (marbles.size() == 2){
     		
@@ -34,11 +30,10 @@ public class Jack extends Standard {
     		 }
     	 if (playerColor.equals(givenColor2)&& !(playerColor.equals(givenColor1))){
     		 return true;
-    	 }
-    	 else{
+    	 }}
+    	
     		 return false;
-    	 }
-    	 }
+    	 
     }
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
@@ -52,7 +47,6 @@ public class Jack extends Standard {
                 "Swap requires one yours and one opponent's marble");
         }
 
-        try {
             if (marbles.size() == 2) {
                 
                 boardManager.swap(marbles.get(0), marbles.get(1));
@@ -60,13 +54,7 @@ public class Jack extends Standard {
               
                 boardManager.moveBy(marbles.get(0), 11, false);
             }
-        } catch (IllegalSwapException e) {
-            throw new ActionException("Swap failed: " + e.getMessage(), e);
-        } catch (IllegalMovementException e) {
-            throw new ActionException("Movement failed: " + e.getMessage(), e);
-        } catch (IllegalDestroyException e) {
-            throw new ActionException("Movement conflict: " + e.getMessage(), e);
-        }
+ 
     }
     
 
