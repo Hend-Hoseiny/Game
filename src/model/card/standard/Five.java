@@ -7,4 +7,33 @@ public class Five extends Standard {
     public Five(String name, String description, Suit suit, BoardManager boardManager, GameManager gameManager) {
         super(name, description, 5, suit, boardManager, gameManager);
     }
+    @Override
+    public boolean validateMarbleColours(ArrayList<Marble> marbles){return true;}
+
+
+    @Override
+    public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
+       
+        if (!validateMarbleSize(marbles)) {
+            throw new InvalidMarbleException("Five requires exactly 1 marble");
+        }
+        if (!validateMarbleColours(marbles)) {
+            throw new InvalidMarbleException("Invalid marble color");
+        }
+
+        try {
+            
+            boardManager.moveBy(marbles.get(0), 5 , false);
+        } catch (IllegalMovementException e) {
+            throw new ActionException("Five movement blocked: " + e.getMessage(), e);
+        } catch (IllegalDestroyException e) {
+            throw new ActionException("Five movement conflict: " + e.getMessage(), e);
+        }
+    }
+
+
+
+
+
+
 }
