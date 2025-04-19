@@ -16,7 +16,7 @@ public class Ace extends Standard {
     }
     @Override
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = GameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
+    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
     	
     	if(marbles.size() == 1){
     		Colour givenColor = marbles.get(0).getColour();
@@ -44,9 +44,7 @@ public class Ace extends Standard {
         if (!validateMarbleColours(marbles)){
         	 throw new InvalidMarbleException("Ace can only move your own marbles");
         }
-        
-        try {
-        	
+
             if (marbles.isEmpty()) {
                 // Fielding case
                 gameManager.fieldMarble();
@@ -54,13 +52,7 @@ public class Ace extends Standard {
                 // Movement case (1 step forward)
                 boardManager.moveBy(marbles.get(0), 1, false);
             }
-        } catch (CannotFieldException e) {
-            throw new RuntimeException("Cannot field marble: " + e.getMessage());
-        } catch (IllegalMovementException e) {
-            throw new ActionException("Invalid Ace movement: " + e.getMessage());
-        } catch (IllegalDestroyException e) {
-            throw new ActionException("Destroy conflict during Ace move: " + e.getMessage());
-        }
+        
     }
 
 }

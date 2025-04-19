@@ -16,7 +16,7 @@ public class Seven extends Standard {
     }
     @Override
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = GameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
+    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
     	if (marbles.size() == 1){
     	Colour givenColor = marbles.get(0).getColour();
     	if (playerColor.equals(givenColor)){
@@ -41,7 +41,6 @@ public class Seven extends Standard {
             throw new InvalidMarbleException("Seven can only move your own marbles");
         }
 
-        try {
             if (marbles.size() == 2) {
                
                 boardManager.moveBy(marbles.get(0), splitDistance, false); // how do i decide the split distance?
@@ -50,10 +49,8 @@ public class Seven extends Standard {
                 
                 boardManager.moveBy(marbles.get(0), 7 , false);
             }
-        } catch (IllegalMovementException e) {
-            throw new ActionException("Seven movement blocked: " + e.getMessage(), e);
-        } catch (IllegalDestroyException e) {
-            throw new ActionException("Seven movement conflict: " + e.getMessage(), e);
+         
+           
         }
     }
 

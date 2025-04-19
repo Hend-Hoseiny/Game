@@ -13,32 +13,30 @@ public class Burner extends Wild {
     }
     @Override
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = GameManager.getActivePlayerColour(); 
+    	Colour playerColor = gameManager.getActivePlayerColour(); 
     	if(marbles.size() == 1){
     	Colour givenColor = marbles.get(0).getColour();
-    	if (!playerColor.equals(givenColor){
+    	if (!playerColor.equals(givenColor)){
     		return true;
     	}}
     	
-    	else{
+    	
     		return false;
-    	}
+    	
     }
     
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException,InvalidMarbleException {
-        try {
+      
             if (!validateMarbleSize(marbles)) {
-                throw new ActionException("Burner requires exactly 1 marble");
+                throw new InvalidMarbleException("Burner requires exactly 1 marble");
             }
             if (!validateMarbleColours(marbles)) {
-                throw new ActionException("Burner can only target opponent marbles");
+                throw new InvalidMarbleException("Burner can only target opponent marbles");
             }
             
             boardManager.destroyMarble(marbles.get(0));
-        } catch (InvalidMarbleException | IllegalDestroyException e) {
-            throw new ActionException("Burn failed: " + e.getMessage(), e);
-        }
+      
     }
 
 

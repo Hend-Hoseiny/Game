@@ -21,14 +21,10 @@ public class Four extends Standard {
             throw new InvalidMarbleException("Four can only move your own marble");
         }
 
-        try {
+     
             
             boardManager.moveBy(marbles.get(0), -4, false); 
-        } catch (IllegalMovementException e) {
-            throw new ActionException("Four movement blocked: " + e.getMessage(), e);
-        } catch (IllegalDestroyException e) {
-            throw new ActionException("Four movement conflict: " + e.getMessage(), e);
-        }
+  
     }
     
 }

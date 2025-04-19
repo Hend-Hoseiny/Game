@@ -16,7 +16,7 @@ public class Queen extends Standard {
     }
     @Override
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = GameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
+    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
     	
     	if(marbles.size() == 1){
     		Colour givenColor = marbles.get(0).getColour();
@@ -45,7 +45,7 @@ public class Queen extends Standard {
         if (!validateMarbleColours(marbles)) {
             throw new InvalidMarbleException("Queen can only move your own marbles");
         }
-        try {
+      
         	if (marbles.isEmpty()) {
         		gameManager.discardCard();
         	}
@@ -54,13 +54,7 @@ public class Queen extends Standard {
                 boardManager.moveBy(marbles.get(0),12 , false);
             }
         	
-        }
         
-        catch (CannotDiscardException e) {
-            throw new ActionException("Queen cannot discard card", e);
-        } catch (IllegalMovementException e) {
-            throw new ActionException("Queen movement blocked", e);
-        } catch (IllegalDestroyException e) {
-            throw new ActionException("Queen movement conflict", e);
-   }}
+        
+ }
     }

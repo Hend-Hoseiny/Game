@@ -23,15 +23,9 @@ public class Five extends Standard {
         if (!validateMarbleColours(marbles)) {
             throw new InvalidMarbleException("Invalid marble color");
         }
-
-        try {
             
             boardManager.moveBy(marbles.get(0), 5 , false);
-        } catch (IllegalMovementException e) {
-            throw new ActionException("Five movement blocked: " + e.getMessage(), e);
-        } catch (IllegalDestroyException e) {
-            throw new ActionException("Five movement conflict: " + e.getMessage(), e);
-        }
+   
     }
 
 

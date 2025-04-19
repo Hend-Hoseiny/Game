@@ -23,7 +23,7 @@ public abstract class Card {
     	return marbles.size() == 1; // most cards use 1 marble
     }
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = GameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
+    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
     	Colour givenColor = marbles.get(0).getColour();
     	if (playerColor.equals(givenColor)){
     		return true;

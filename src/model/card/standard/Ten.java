@@ -16,7 +16,7 @@ public class Ten extends Standard {
     }
     @Override
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = GameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
+    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
     	
     	if(marbles.size() == 1){
     		Colour givenColor = marbles.get(0).getColour();
@@ -45,7 +45,7 @@ public class Ten extends Standard {
             throw new InvalidMarbleException("Ten can only move your marbles");
         }
 
-        try {
+      
             if (marbles.isEmpty()) {
               
                 Colour nextPlayer = gameManager.getNextPlayerColour();
@@ -54,14 +54,8 @@ public class Ten extends Standard {
      
                 boardManager.moveBy(marbles.get(0), 10 , false);
             }
-        } catch (CannotDiscardException e) {
-            throw new ActionException("Cannot discard from next player", e);
-        } catch (IllegalMovementException e) {
-            throw new ActionException("Ten movement blocked", e);
-        } catch (IllegalDestroyException e) {
-            throw new ActionException("Ten movement conflict", e);
+  
         }
-    }
     
 
 }
