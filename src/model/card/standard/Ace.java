@@ -1,7 +1,8 @@
 package model.card.standard;
-
+import model.Colour;
 import engine.GameManager;
 import engine.board.BoardManager;
+import exception.*;
 
 public class Ace extends Standard {
     public Ace(String name, String description, Suit suit, BoardManager boardManager, GameManager gameManager) {
@@ -25,10 +26,10 @@ public class Ace extends Standard {
 	    	}
     	}
     	if (marbles.size() == 0){
-    		return true
+    		return true;
     	}
     	else{
-    		return false
+    		return false;
     	}
     	
     }

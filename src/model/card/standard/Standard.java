@@ -1,9 +1,9 @@
 package model.card.standard;
-
+import model.Colour;
 import engine.GameManager;
 import engine.board.BoardManager;
 import model.card.Card;
-
+import exception.*;
 public class Standard extends Card {
     // A standard card has the following 8 subclasses: Ace, King, Queen, Jack, Four,
     // Five,

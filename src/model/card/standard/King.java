@@ -1,8 +1,8 @@
 package model.card.standard;
-
+import model.Colour;
 import engine.GameManager;
 import engine.board.BoardManager;
-
+import exception.*;
 public class King extends Standard {
     public King(String name, String description, Suit suit, BoardManager boardManager, GameManager gameManager) {
         super(name, description, 13, suit, boardManager, gameManager);
