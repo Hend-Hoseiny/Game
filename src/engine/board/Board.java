@@ -158,6 +158,8 @@ public class Board implements BoardManager{
                     throw new IllegalMovementException("Oops! Cannot put marble in Safe Zone!");
                 else {
                     for(int i = this.getPositionInPath(stepsList, marble); i<steps; i++)
+                        //no idea
+                        ;
                         
                 }
             }
@@ -165,7 +167,7 @@ public class Board implements BoardManager{
             // if num of steps > steps till entry: move on GT and SZ            
             else {
                 for (int i=0;i<steps; i++)
-                    stepsList.add(this.track.get( (this.getPositionInPath(stepsList, marble)+i) % 100).getCellType());
+                    stepsList.add(this.track.get( (this.getPositionInPath(stepsList, marble)+i) % 100));
                 
             }
 
@@ -173,8 +175,8 @@ public class Board implements BoardManager{
         
         //if SZ:
         else if (cellType == CellType.SAFE) {
-            int index = getPositionInPath();
-
+            // int index = getPositionInPath();
+            int index=0;
             // four: if in safe zone: exception.
             if(steps == 4)
                 throw new IllegalMovementException("Oops! Cannot move backwards in Safe Zone!");
@@ -251,68 +253,28 @@ public class Board implements BoardManager{
             throw new IllegalDestroyException("Oops! Cannot destroy a marble in its Safe Zone!");
     }
 
-    //hageeb el color ezay??????
-    private void validateFielding(Cell occupiedBaseCell) throws CannotFieldException{
-        if(occupiedBaseCell.getMarble() != null && occupiedBaseCell.getMarble().getColour() ==)
-            throw new CannotFieldException("Oops! Cannot field a marble in a Base Cell that is not empty!");
+    // //hageeb el color ezay??????
+    // private void validateFielding(Cell occupiedBaseCell) throws CannotFieldException{
+    //     if(occupiedBaseCell.getMarble() != null && occupiedBaseCell.getMarble().getColour() ==)
+    //         throw new CannotFieldException("Oops! Cannot field a marble in a Base Cell that is not empty!");
     
-        }
+    //     }
 
         
-    private void validateSaving(int positionInSafeZone, int positionOnTrack) throws InvalidMarbleException{
-        if(positionOnTrack == -1)
-            throw new InvalidMarbleException("Oops! Cannot save a marble in the Home Zone");
+    // private void validateSaving(int positionInSafeZone, int positionOnTrack) throws InvalidMarbleException{
+    //     if(positionOnTrack == -1)
+    //         throw new InvalidMarbleException("Oops! Cannot save a marble in the Home Zone");
         
-        if(this.track.get(positionOnTrack).getCellType() == CellType.SAFE)
-            throw new InvalidMarbleException("Oops! Cannot save a marble in its Safe Zone!");
-    }
+    //     if(this.track.get(positionOnTrack).getCellType() == CellType.SAFE)
+    //         throw new InvalidMarbleException("Oops! Cannot save a marble in its Safe Zone!");
+    // }
 
-
-
-    
-    @Override
-    public void moveBy(Marble marble, int steps, boolean destroy)
-            throws IllegalMovementException, IllegalDestroyException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'moveBy'");
-    }
-
-    @Override
-    public void swap(Marble marble_1, Marble marble_2) throws IllegalSwapException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'swap'");
-    }
-
-    @Override
-    public void destroyMarble(Marble marble) throws IllegalDestroyException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'destroyMarble'");
-    }
-
-    @Override
-    public void sendToBase(Marble marble) throws CannotFieldException, IllegalDestroyException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'sendToBase'");
-    }
-
-    @Override
-    public void sendToSafe(Marble marble) throws InvalidMarbleException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'sendToSafe'");
-    }
-
-    @Override
-    public ArrayList<Marble> getActionableMarbles() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getActionableMarbles'");
-    }
-   
      //mile stone 2
     // Method 10 
     // Check if you can place a marble in the Base Cell
     private void validateFielding(Cell occupiedBaseCell) throws CannotFieldException {
         Marble occupyingMarble = occupiedBaseCell.getMarble();
-        if (occupyingMarble != null && occupyingMarble.getColour().equals(occupiedBaseCell.getCellType())) {
+        if (occupyingMarble != null && occupyingMarble.getColour()==gameManager.getActivePlayerColour()) {
             throw new CannotFieldException("Cannot field marble: Base Cell is already occupied by a friendly marble.");
         }
     }
@@ -328,6 +290,9 @@ public class Board implements BoardManager{
     }
     
     //method 12
+    private void move(Marble marble, ArrayList<Cell> fullPath, boolean destroy) throws IllegalDestroyException{
+
+    }
     public void moveBy(Marble marble, int steps, boolean destroy) throws IllegalMovementException, IllegalDestroyException {
         ArrayList<Cell> fullPath = validateSteps(marble, steps);
         validatePath(marble, fullPath, destroy);
@@ -341,8 +306,8 @@ public class Board implements BoardManager{
         validateSwap(marble1, marble2);
         
         // Find cells
-        Cell cell1 = findCellWithMarble(marble1);
-        Cell cell2 = findCellWithMarble(marble2);
+        Cell cell1 = track.get(this.getPositionInPath(track, marble1));
+        Cell cell2 = track.get(this.getPositionInPath(track, marble2));
 
         // Swap
         if (cell1 != null && cell2 != null) {
@@ -355,7 +320,7 @@ public class Board implements BoardManager{
     //method 14
     
     public void destroyMarble(Marble marble) throws IllegalDestroyException {
-        Cell currentCell = findCellWithMarble(marble);
+        Cell currentCell = track.get(this.getPositionInPath(track, marble));
         if (currentCell == null) {
             throw new IllegalDestroyException("Marble not on track, cannot destroy.");
         }
@@ -388,7 +353,7 @@ public class Board implements BoardManager{
         validateSaving(inSafe, onTrack);
 
         // Remove from current track cell
-        Cell current = findCellWithMarble(marble);
+        Cell current = track.get(this.getPositionInPath(track, marble));
         if (current != null) {
             current.setMarble(null);
         }
