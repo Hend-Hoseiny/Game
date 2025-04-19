@@ -426,7 +426,29 @@ public class Board implements BoardManager{
         return actionable;
     }
     
-    
+    //helper findCellWithMarble which finds the cell with the a marble obj
+    private Cell findCellWithMarble(Marble marble) {
+    // Search in the main track
+    for (int i = 0; i < track.size(); i++) {
+        if (track.get(i).getMarble() == marble) {
+            return track.get(i);
+        }
+    }
+
+    // Search in all SafeZones
+    for (int i = 0; i < safeZones.size(); i++) {
+        ArrayList<Cell> zoneCells = safeZones.get(i).getCells();
+        for (int j = 0; j < zoneCells.size(); j++) {
+            if (zoneCells.get(j).getMarble() == marble) {
+                return zoneCells.get(j);
+            }
+        }
+    }
+
+    // Marble not found on board
+    return null;
+}
+
 }
 
 
