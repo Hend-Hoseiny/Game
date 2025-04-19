@@ -307,6 +307,124 @@ public class Board implements BoardManager{
         throw new UnsupportedOperationException("Unimplemented method 'getActionableMarbles'");
     }
    
+     //mile stone 2
+    // Method 10 
+    // Check if you can place a marble in the Base Cell
+    private void validateFielding(Cell occupiedBaseCell) throws CannotFieldException {
+        Marble occupyingMarble = occupiedBaseCell.getMarble();
+        if (occupyingMarble != null && occupyingMarble.getColour().equals(occupiedBaseCell.getCellType())) {
+            throw new CannotFieldException("Cannot field marble: Base Cell is already occupied by a friendly marble.");
+        }
+    }
+    
+    //method 11
+    private void validateSaving(int positionInSafeZone, int positionOnTrack) throws InvalidMarbleException {
+        if (positionInSafeZone != -1) {
+            throw new InvalidMarbleException("Marble is already in the Safe Zone.");
+        }
+        if (positionOnTrack == -1) {
+            throw new InvalidMarbleException("Marble is not on the track and cannot be sent to Safe Zone.");
+        }
+    }
+    
+    //method 12
+    public void moveBy(Marble marble, int steps, boolean destroy) throws IllegalMovementException, IllegalDestroyException {
+        ArrayList<Cell> fullPath = validateSteps(marble, steps);
+        validatePath(marble, fullPath, destroy);
+        move(marble, fullPath, destroy);
+    }
+    
+    //method 13
+    
+    
+    public void swap(Marble marble1, Marble marble2) throws IllegalSwapException {
+        validateSwap(marble1, marble2);
+        
+        // Find cells
+        Cell cell1 = findCellWithMarble(marble1);
+        Cell cell2 = findCellWithMarble(marble2);
+
+        // Swap
+        if (cell1 != null && cell2 != null) {
+            cell1.setMarble(marble2);
+            cell2.setMarble(marble1);
+        }
+    }
+
+    
+    //method 14
+    
+    public void destroyMarble(Marble marble) throws IllegalDestroyException {
+        Cell currentCell = findCellWithMarble(marble);
+        if (currentCell == null) {
+            throw new IllegalDestroyException("Marble not on track, cannot destroy.");
+        }
+        validateDestroy(getPositionInPath(track, marble));
+        currentCell.setMarble(null);
+        gameManager.sendHome(marble);
+    }
+    
+    //method 15
+    
+    public void sendToBase(Marble marble) throws CannotFieldException, IllegalDestroyException {
+        int basePos = getBasePosition(marble.getColour());
+        Cell baseCell = track.get(basePos);
+
+        if (baseCell.getMarble() != null) {
+            validateFielding(baseCell);
+            destroyMarble(baseCell.getMarble());
+        }
+
+        baseCell.setMarble(marble);
+    }
+    
+    //method 16
+    
+    public void sendToSafe(Marble marble) throws InvalidMarbleException {
+        ArrayList<Cell> zone = getSafeZone(marble.getColour());
+        int inSafe = getPositionInPath(zone, marble);
+        int onTrack = getPositionInPath(track, marble);
+
+        validateSaving(inSafe, onTrack);
+
+        // Remove from current track cell
+        Cell current = findCellWithMarble(marble);
+        if (current != null) {
+            current.setMarble(null);
+        }
+
+        // Assign to first available cell in safe zone
+        for (Cell c : zone) {
+            if (c.getMarble() == null) {
+                c.setMarble(marble);
+                return;
+            }
+        }
+    }
+    
+    //method 17
+    
+    public ArrayList<Marble> getActionableMarbles() {
+        ArrayList<Marble> actionable = new ArrayList<>();
+        Colour active = gameManager.getActivePlayerColour();
+
+        // From track
+        for (Cell c : track) {
+            if (c.getMarble() != null && c.getMarble().getColour() == active) {
+                actionable.add(c.getMarble());
+            }
+        }
+
+        // From safe zone
+        ArrayList<Cell> zone = getSafeZone(active);
+        for (Cell c : zone) {
+            if (c.getMarble() != null && c.getMarble().getColour() == active) {
+                actionable.add(c.getMarble());
+            }
+        }
+
+        return actionable;
+    }
     
     
 }
