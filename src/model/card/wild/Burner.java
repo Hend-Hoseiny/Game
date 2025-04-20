@@ -11,18 +11,45 @@ public class Burner extends Wild {
     public Burner(String name, String description, BoardManager boardManager, GameManager gameManager) {
         super(name, description, boardManager, gameManager);
     }
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    private int countUniqueColours(ArrayList<Marble> marbles){
+        ArrayList<Marble> temp = new ArrayList<>();
+        for(int i=0 ; i<marbles.size() ; i++){
+            if(!containsColour(temp, marbles.get(i).getColour()))
+                temp.add(marbles.get(i));
+        }
+        return temp.size();
+    }
+
+    private boolean containsColour(ArrayList<Marble> marbles , Colour colour){
+        for(int i =0 ; i<marbles.size(); i++){
+            if(marbles.get(i).getColour()==colour)
+                return true;
+        }
+        return false;
+    }
+
+    private boolean checkValidColours(ArrayList<Marble> marbles){
+        ArrayList<Colour> colours = new ArrayList<>();
+        colours.add(Colour.BLUE);
+        colours.add(Colour.GREEN);
+        colours.add(Colour.RED);
+        colours.add(Colour.YELLOW);
+
+        for(Marble marble:marbles){
+            if(!colours.contains(marble.getColour()))
+                return false;
+        }
+        return true;
+    }
     @Override
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
     	Colour playerColor = gameManager.getActivePlayerColour(); 
-    	if(marbles.size() == 1){
-    	Colour givenColor = marbles.get(0).getColour();
-    	if (!playerColor.equals(givenColor)){
-    		return true;
-    	}}
-    	
-    	
-    		return false;
-    	
+    	if(countUniqueColours(marbles)!=1)
+            return false;
+        if(containsColour(marbles, playerColor))
+            return false;
+        return checkValidColours(marbles);
     }
     
     @Override
@@ -34,7 +61,6 @@ public class Burner extends Wild {
             if (!validateMarbleColours(marbles)) {
                 throw new InvalidMarbleException("Burner can only target opponent marbles");
             }
-            
             boardManager.destroyMarble(marbles.get(0));
       
     }

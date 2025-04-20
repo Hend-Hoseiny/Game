@@ -15,44 +15,21 @@ public class Queen extends Standard {
     	return (marbles.size() == 1)|| (marbles.size() == 0) ; 
     }
     @Override
-    public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
-    	
-    	if(marbles.size() == 1){
-    		Colour givenColor = marbles.get(0).getColour();
-	    	if (playerColor.equals(givenColor)){
-	    		
-	    		return true;
-	    	}
-	    	else{
-	    		return false;
-	    	}
-    	}
-    	if (marbles.size() == 0){
-    		return true;
-    	}
-    	else{
-    		return false;
-    	}
-    	
-    }
-    @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
   
         if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("Queen requires 0 or 1 marbles");
+            throw new InvalidMarbleException("Queen requires exactly 0 or 1 marbles");
         }
         if (!validateMarbleColours(marbles)) {
-            throw new InvalidMarbleException("Queen can only move your own marbles");
+            throw new InvalidMarbleException("The marble selected must be of your colour");
         }
       
-        	if (marbles.isEmpty()) {
-        		gameManager.discardCard();
-        	}
-        	else {
-               
-                boardManager.moveBy(marbles.get(0),12 , false);
-            }
+		if (marbles.isEmpty()) {
+			gameManager.discardCard();
+		}
+		else {
+			boardManager.moveBy(marbles.get(0),12 , false);
+		}
         	
         
         

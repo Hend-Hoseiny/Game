@@ -1,6 +1,7 @@
 package engine.board;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import engine.GameManager;
@@ -93,10 +94,10 @@ public class Board implements BoardManager{
 
     private int getPositionInPath(ArrayList<Cell> path, Marble marble){
         
-        for(int j=0; j<4; j++){
-            if(this.getSafeZone(marble.getColour()).get(j).getMarble() == marble)
-                return j;
-        }
+        // for(int j=0; j<4; j++){
+        //     if(this.getSafeZone(marble.getColour()).get(j).getMarble() == marble)
+        //         return j;
+        // }
         
         for (int i = 0; i < path.size(); i++) {
             if (path.get(i).getMarble() == marble)
@@ -130,8 +131,6 @@ public class Board implements BoardManager{
         }
         return -1;
     }
-
-
 
 
     private ArrayList<Cell> validateSteps(Marble marble, int steps) throws IllegalMovementException{
@@ -359,12 +358,15 @@ public class Board implements BoardManager{
         }
 
         // Assign to first available cell in safe zone
+        ArrayList<Cell> emptySafeZones = new ArrayList<Cell>();
         for (Cell c : zone) {
             if (c.getMarble() == null) {
-                c.setMarble(marble);
-                return;
+                emptySafeZones.add(c);
             }
         }
+        Collections.shuffle(emptySafeZones);
+        emptySafeZones.get(0).setMarble(marble);
+
     }
     
     //method 17

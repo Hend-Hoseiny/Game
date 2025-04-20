@@ -35,18 +35,21 @@ public class Standard extends Card {
         return suit;
     }
     
+    // ----------------------------------------------------------------------------------------------------------------------------------------------
+
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
         if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("Seven requires 1 or 2 marbles");
+            throw new InvalidMarbleException("You can act on exactly 1 of your marbles.");
         }
         if (!validateMarbleColours(marbles)) {
-            throw new InvalidMarbleException("Seven can only move your own marbles");
+            throw new InvalidMarbleException("The marble selected must be of your colour.");
         }
-                boardManager.moveBy(marbles.get(0), rank , false);
+        boardManager.moveBy(marbles.get(0), rank , false);
          
            
-        }
     }
+
+}
 
 
 
