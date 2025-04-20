@@ -156,7 +156,10 @@ public class Game implements GameManager {
     }
     
     public void sendHome(Marble marble){
-        players.get(currentPlayerIndex).regainMarble(marble);
+        for(Player player : players){
+            if(player.getColour()==marble.getColour())
+                player.regainMarble(marble);
+        }
     }
 
     public void fieldMarble() throws CannotFieldException, IllegalDestroyException{
