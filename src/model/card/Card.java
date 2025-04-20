@@ -19,18 +19,18 @@ public abstract class Card {
         this.gameManager = gameManager;
         this.boardManager = boardManager;
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------
     public boolean validateMarbleSize(ArrayList<Marble> marbles){
     	return marbles.size() == 1; // most cards use 1 marble
     }
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
-    	Colour givenColor = marbles.get(0).getColour();
-    	if (playerColor.equals(givenColor)){
-    		return true;
-    	}
-    	else{
-    		return false;
-    	}
+    	Colour playerColor = gameManager.getActivePlayerColour(); 
+    	for(int i=0 ; i<marbles.size() ; i++){
+            if(marbles.get(i).getColour()!=playerColor)
+                return false;
+        }
+        return true;
     }
     
     public abstract void act(ArrayList<Marble> marbles) throws ActionException,InvalidMarbleException;

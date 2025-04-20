@@ -1,7 +1,6 @@
 package model.card.wild;
 import java.util.ArrayList;
 import exception.*;
-import model.Colour;
 import model.player.*;
 import engine.GameManager;
 import engine.board.BoardManager;
@@ -19,10 +18,7 @@ public class Saver extends Wild {
         if (!validateMarbleColours(marbles)) {
             throw new InvalidMarbleException("Saver can only save your marbles");
         }
-
-       
-            boardManager.sendToSafe(marbles.get(0)); 
- 
+        boardManager.sendToSafe(marbles.get(0)); 
     }
 
 }

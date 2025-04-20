@@ -15,28 +15,6 @@ public class Ten extends Standard {
     	return (marbles.size() == 1)|| (marbles.size() == 0) ; // most cards use 1 marble
     }
     @Override
-    public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
-    	
-    	if(marbles.size() == 1){
-    		Colour givenColor = marbles.get(0).getColour();
-	    	if (playerColor.equals(givenColor)){
-	    		
-	    		return true;
-	    	}
-	    	else{
-	    		return false;
-	    	}
-    	}
-    	if (marbles.size() == 0){
-    		return true;
-    	}
-    	else{
-    		return false;
-    	}
-    	
-    }
-    @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
         if (!validateMarbleSize(marbles)) {
             throw new InvalidMarbleException("Ten requires 0 or 1 marbles");
@@ -44,18 +22,14 @@ public class Ten extends Standard {
         if (!validateMarbleColours(marbles)) {
             throw new InvalidMarbleException("Ten can only move your marbles");
         }
-
-      
-            if (marbles.isEmpty()) {
-              
-                Colour nextPlayer = gameManager.getNextPlayerColour();
-                gameManager.discardCard(nextPlayer); 
-            } else {
-     
-                boardManager.moveBy(marbles.get(0), 10 , false);
-            }
-  
+        if (marbles.isEmpty()) {
+            Colour nextPlayer = gameManager.getNextPlayerColour();
+            gameManager.discardCard(nextPlayer); 
+        } else {
+            boardManager.moveBy(marbles.get(0), 10 , false);
         }
+  
+    }
     
 
 }

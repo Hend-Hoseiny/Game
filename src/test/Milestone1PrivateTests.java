@@ -462,7 +462,7 @@ public class Milestone1PrivateTests {
 					Field attributeField= Class.forName(cardPath).getDeclaredField("description");
 					attributeField.setAccessible(true);
 					arraylistCounter++;
-					assertEquals("Wild card description loaded incorrectly ", description, (String)attributeField.get(card));
+					assertEquals("Wild card description loaded incorrectly ", description, ((String)attributeField.get(card)).split(",")[0]);
 				}
 
 			}

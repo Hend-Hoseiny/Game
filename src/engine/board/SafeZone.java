@@ -32,7 +32,7 @@ public class SafeZone {
         return cells;
     }
 
-    public  boolean isFull(){
+    public boolean isFull(){
         for(int i=0; i<4; i++){
             if(this.cells.get(i).getMarble() == null)
                 return false;

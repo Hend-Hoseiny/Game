@@ -10,8 +10,27 @@ public class Five extends Standard {
     public Five(String name, String description, Suit suit, BoardManager boardManager, GameManager gameManager) {
         super(name, description, 5, suit, boardManager, gameManager);
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private boolean checkValidColours(ArrayList<Marble> marbles){
+        ArrayList<Colour> colours = new ArrayList<>();
+        colours.add(Colour.BLUE);
+        colours.add(Colour.GREEN);
+        colours.add(Colour.RED);
+        colours.add(Colour.YELLOW);
+
+        for(Marble marble:marbles){
+            if(!colours.contains(marble.getColour()))
+                return false;
+        }
+        return true;
+    }
+
     @Override
-    public boolean validateMarbleColours(ArrayList<Marble> marbles){return true;}
+    public boolean validateMarbleColours(ArrayList<Marble> marbles){
+        return checkValidColours(marbles);
+    }
 
 
     @Override
@@ -24,7 +43,7 @@ public class Five extends Standard {
             throw new InvalidMarbleException("Invalid marble color");
         }
             
-            boardManager.moveBy(marbles.get(0), 5 , false);
+        boardManager.moveBy(marbles.get(0), 5 , false);
    
     }
 

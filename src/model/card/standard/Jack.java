@@ -10,36 +10,59 @@ public class Jack extends Standard {
     public Jack(String name, String description, Suit suit, BoardManager boardManager, GameManager gameManager) {
         super(name, description, 11, suit, boardManager, gameManager);
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------
+    
+    @Override
     public boolean validateMarbleSize(ArrayList<Marble> marbles){
     	return (marbles.size() == 1)|| (marbles.size() == 2) ; 
     }
+
+    private int countUniqueColours(ArrayList<Marble> marbles){
+        ArrayList<Marble> temp = new ArrayList<>();
+        for(int i=0 ; i<marbles.size() ; i++){
+            if(!containsColour(temp, marbles.get(i).getColour()))
+                temp.add(marbles.get(i));
+        }
+        return temp.size();
+    }
+
+    private boolean containsColour(ArrayList<Marble> marbles , Colour colour){
+        for(int i =0 ; i<marbles.size(); i++){
+            if(marbles.get(i).getColour()==colour)
+                return true;
+        }
+        return false;
+    }
+
+    private boolean checkValidColours(ArrayList<Marble> marbles){
+        ArrayList<Colour> colours = new ArrayList<>();
+        colours.add(Colour.BLUE);
+        colours.add(Colour.GREEN);
+        colours.add(Colour.RED);
+        colours.add(Colour.YELLOW);
+
+        for(Marble marble:marbles){
+            if(!colours.contains(marble.getColour()))
+                return false;
+        }
+        return true;
+    }
+
     @Override
-
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
-    	Colour playerColor = gameManager.getActivePlayerColour(); //based on the assumption of default 1 marble
-    	Colour givenColor1 = marbles.get(0).getColour();
-    	if(marbles.size() == 1 && playerColor.equals(givenColor1) ){
-	    		return true;
-
-    	}
-    	if (marbles.size() == 2){
-    		
-    		Colour givenColor2 = marbles.get(1).getColour();
-    	 if (playerColor.equals(givenColor1)&& !(playerColor.equals(givenColor2)) ){
-    		 return true;
-    		 }
-    	 if (playerColor.equals(givenColor2)&& !(playerColor.equals(givenColor1))){
-    		 return true;
-    	 }}
-    	
-    		 return false;
-    	 
+    	Colour playerColor = gameManager.getActivePlayerColour(); 
+    	if(countUniqueColours(marbles)<1 || countUniqueColours(marbles)>2)
+            return false;
+        if(!containsColour(marbles, playerColor))
+            return false;
+        return checkValidColours(marbles);
     }
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
         // 1. Explicit validation
         if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("Jack requires 1 or 2 marbles");
+            throw new InvalidMarbleException("Jack requires exactly 1 or 2 marbles");
         }
         if (!validateMarbleColours(marbles)) {
             throw new InvalidMarbleException(marbles.size() == 1 ? 
@@ -47,15 +70,14 @@ public class Jack extends Standard {
                 "Swap requires one yours and one opponent's marble");
         }
 
-            if (marbles.size() == 2) {
-                
-                boardManager.swap(marbles.get(0), marbles.get(1));
-            } else {
-              
-                boardManager.moveBy(marbles.get(0), 11, false);
-            }
+        if (marbles.size() == 2) {
+            boardManager.swap(marbles.get(0), marbles.get(1));
+        } else {
+            boardManager.moveBy(marbles.get(0), 11, false);
+        }
  
     }
     
 
 }
+ 

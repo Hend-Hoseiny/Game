@@ -116,7 +116,15 @@ public class Game implements GameManager {
     }
 
     public void playPlayerTurn() throws GameException{
-        players.get(currentPlayerIndex).play();
+        if(canPlayTurn())
+            players.get(currentPlayerIndex).play();
+        if(checkWin()!=null){
+            System.out.println("Player with colour " + checkWin().toString() + " has won");
+        }
+        else{
+            endPlayerTurn();
+            playPlayerTurn();
+        }       
     }
 
     public void endPlayerTurn(){
@@ -141,21 +149,17 @@ public class Game implements GameManager {
     public Colour checkWin(){
         for(int i=0 ; i<board.getSafeZones().size() ; i++){
             SafeZone s = board.getSafeZones().get(i);
-            if(checkAllOccupied(s.getCells()))
+            if(s.isFull())
                 return s.getColour();
         }
         return null;
     }
-    private boolean checkAllOccupied(ArrayList<Cell> arr){
-        for(int i=0 ; i<arr.size() ; i++){
-            if (arr.get(i).getMarble()==null)
-                return false;
-        }
-        return true;
-    }
-
+    
     public void sendHome(Marble marble){
-        players.get(currentPlayerIndex).regainMarble(marble);
+        for(Player player : players){
+            if(player.getColour()==marble.getColour())
+                player.regainMarble(marble);
+        }
     }
 
     public void fieldMarble() throws CannotFieldException, IllegalDestroyException{
