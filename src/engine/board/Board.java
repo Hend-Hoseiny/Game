@@ -94,10 +94,20 @@ public class Board implements BoardManager{
 
     private int getPositionInPath(ArrayList<Cell> path, Marble marble){
         
-        // for(int j=0; j<4; j++){
-        //     if(this.getSafeZone(marble.getColour()).get(j).getMarble() == marble)
-        //         return j;
-        // }
+        for (int i = 0; i < path.size(); i++) {
+            if (path.get(i).getMarble() == marble)
+                return i;
+        }
+        
+        return -1;
+    }
+
+    private int getPositionInPath1(ArrayList<Cell> path, Marble marble){
+        
+        for(int j=0; j<4; j++){
+            if(this.getSafeZone(marble.getColour()).get(j).getMarble() == marble)
+                return j;
+        }
         
         for (int i = 0; i < path.size(); i++) {
             if (path.get(i).getMarble() == marble)
@@ -132,8 +142,64 @@ public class Board implements BoardManager{
         return -1;
     }
 
-
     private ArrayList<Cell> validateSteps(Marble marble, int steps) throws IllegalMovementException{
+        Colour currentColour = marble.getColour();
+        int trackPosition = getPositionInPath(track, marble);
+        int safeZonePosition = getPositionInPath(getSafeZone(currentColour), marble);
+        if(trackPosition==-1 && safeZonePosition==-1)
+            throw new IllegalMovementException("Cannot move marble in home zone");
+        ArrayList<Cell> path = new ArrayList<Cell>();
+        if(trackPosition!=-1){
+            path.add(track.get(trackPosition));
+            if(steps<0){
+                for(int i=1 ; i<=4 ; i++){
+                    int index = trackPosition-i;
+                    if(index<0)
+                        index+=100;
+                    path.add(track.get(index));
+                }
+                return path;
+            }
+            int entryPosition = getEntryPosition(currentColour);
+            int movesTillEntryPosition = entryPosition-trackPosition;
+            if(movesTillEntryPosition<0)
+                movesTillEntryPosition+=100;
+            if(steps<=movesTillEntryPosition || currentColour!=gameManager.getActivePlayerColour()){
+                for(int i=1 ; i<=steps ; i++){
+                    int index = (trackPosition+i)%100;
+                    path.add(track.get(index));
+                }
+                return path;
+            }
+            else{
+                if(steps>movesTillEntryPosition+4) 
+                    throw new IllegalMovementException("The rank of the played card is too high");
+                for(int i=1 ; i<=movesTillEntryPosition ; i++){
+                    int index = (trackPosition+i)%100;
+                    path.add(track.get(index));
+                }
+                for(int i=0 ; i<steps-movesTillEntryPosition ; i++){
+                    path.add(getSafeZone(currentColour).get(i));
+                }
+                return path;
+            }
+        }
+        if(safeZonePosition!=-1){
+            path.add(getSafeZone(currentColour).get(safeZonePosition));
+            if(steps<0)
+                throw new IllegalMovementException("Cannot move backwards in safezone");
+            if(safeZonePosition+steps>3)
+               throw new IllegalMovementException("The rank of the played card is too high");
+            for(int i=1 ; i<=steps ; i++)
+                path.add(getSafeZone(currentColour).get(safeZonePosition+i));
+            return path;
+        }
+        return path;
+    }
+
+
+
+    private ArrayList<Cell> validateSteps1(Marble marble, int steps) throws IllegalMovementException{
 
         //identify position + track or SZ, else: exception, can't move
         CellType cellType = this.track.get(this.getPositionInPath(this.track, marble)).getCellType();

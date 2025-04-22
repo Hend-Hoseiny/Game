@@ -52,11 +52,11 @@ public class Jack extends Standard {
     @Override
     public boolean validateMarbleColours(ArrayList<Marble> marbles){
     	Colour playerColor = gameManager.getActivePlayerColour(); 
-    	if(countUniqueColours(marbles)<1 || countUniqueColours(marbles)>2)
-            return false;
-        if(!containsColour(marbles, playerColor))
-            return false;
-        return checkValidColours(marbles);
+        if(marbles.size()==1 && marbles.get(0).getColour()==playerColor)
+            return true;
+    	if(countUniqueColours(marbles)==2 && containsColour(marbles, playerColor) && checkValidColours(marbles))
+            return true;
+        return false;
     }
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
