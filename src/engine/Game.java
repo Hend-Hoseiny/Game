@@ -116,15 +116,7 @@ public class Game implements GameManager {
     }
 
     public void playPlayerTurn() throws GameException{
-        if(canPlayTurn())
-            players.get(currentPlayerIndex).play();
-        if(checkWin()!=null){
-            System.out.println("Player with colour " + checkWin().toString() + " has won");
-        }
-        else{
-            endPlayerTurn();
-            playPlayerTurn();
-        }       
+        players.get(currentPlayerIndex).play();
     }
 
     public void endPlayerTurn(){
