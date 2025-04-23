@@ -267,19 +267,19 @@ public class Board implements BoardManager{
     }
 
 
-    private void validateDestroy(int positionInPath) throws IllegalDestroyException{
-        if(positionInPath==-1)
+
+    private void validateDestroy(int positionInPath) throws IllegalDestroyException {
+        if (positionInPath == -1)
             throw new IllegalDestroyException("Oops! Cannot destroy a marble that is not on the track!");
-        Marble currentMarble = track.get(positionInPath).getMarble();
-        if(currentMarble==null)
-            return;
-        int marbleBasePosition = getBasePosition(currentMarble.getColour());
-        if(positionInPath==marbleBasePosition)
-            throw new IllegalDestroyException("Oops! Cannot destroy a marble in its Base Cell!");
-        
+        Cell c = track.get(positionInPath);
+        if (c.getCellType() == CellType.BASE &&
+            c.getMarble() != null &&
+            getBasePosition(c.getMarble().getColour()) == positionInPath)
+            throw new IllegalDestroyException("Oops! Cannot destroy a marble in its own Base Cell!");
+        if (c.getCellType() == CellType.SAFE)
+            throw new IllegalDestroyException("Oops! Cannot destroy a marble in its Safe Zone!");
     }
 
-    
      //mile stone 2
     // Method 10 
     // Check if you can place a marble in the Base Cell
