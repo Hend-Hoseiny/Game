@@ -7,8 +7,6 @@ import exception.InvalidCardException;
 import exception.InvalidMarbleException;
 import model.Colour;
 import model.card.*;
-import model.card.standard.Standard;
-import model.card.standard.Suit;
 
 public class Player {
     private final String name;
