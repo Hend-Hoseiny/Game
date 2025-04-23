@@ -142,11 +142,11 @@ private ArrayList<Cell> validateSteps(Marble marble, int steps) throws IllegalMo
 
     if (positionOnTrack != -1) {
         stepsList.add(this.track.get(positionOnTrack));
-        int entryPosition = this.getEntryPosition(color);
+        int entryPosition = this.getEntryPosition(gameManager.getActivePlayerColour());
         int distanceToEntry = (entryPosition - positionOnTrack + 100) % 100;
 
         if (steps > 0) {
-            if (steps > distanceToEntry) {
+            if (steps > distanceToEntry && marble.getColour() == gameManager.getActivePlayerColour()) {
                 for (int i = 1; i <= distanceToEntry; i++) 
                     stepsList.add(this.track.get((positionOnTrack + i) % 100));
                 
@@ -154,9 +154,9 @@ private ArrayList<Cell> validateSteps(Marble marble, int steps) throws IllegalMo
                 ArrayList<Cell> safeZone = this.getSafeZone(color);
 
                 for (int i = 0; i < remainingSteps; i++) {
-                    if(activeColour != color) {
-                        throw new IllegalMovementException("Oops! Cannot move a marble in another player's Safe Zone.");
-                    }
+                    // if(activeColour != color) {
+                    //     throw new IllegalMovementException("Oops! Cannot move a marble in another player's Safe Zone.");
+                    // }
                     if (i >= safeZone.size() ) {
                         throw new IllegalMovementException("Oops! Card rank is too high!");
                     }
@@ -181,9 +181,9 @@ private ArrayList<Cell> validateSteps(Marble marble, int steps) throws IllegalMo
             ArrayList<Cell> safeZone = this.getSafeZone(color);
             stepsList.add(safeZone.get(indexInSafeZone));
 
-            if(activeColour != color) {
-                throw new IllegalMovementException("Oops! Cannot move a marble in another player's Safe Zone.");
-            }
+            // if(activeColour != color) {
+            //     throw new IllegalMovementException("Oops! Cannot move a marble in another player's Safe Zone.");
+            // }
 
             if (steps > 0) {
                 if (steps > safeZone.size() - indexInSafeZone - 1) {
@@ -221,18 +221,18 @@ private void validatePath(Marble marble, ArrayList<Cell> fullPath, boolean destr
 
         // Rule 1: Cannot bypass or destroy your own marble -  Self-Blocking: A marble cannot move if there is another marble owned by the same
         // player either in its path or at the target position.
-        if (activeColour == marble.getColour() && !destroy) {
+        if (activeColour == marbleColor && !destroy) {
             throw new IllegalMovementException("Oops! Cannot bypass or destroy your own marble!");
         }
 
         // Rule 2: Cannot bypass or destroy a marble in its Base Cell
-        if (fullPath.get(i).getCellType() == CellType.BASE) {
+        if (fullPath.get(i).getCellType() == CellType.BASE && getBasePosition(marbleColor) == track.indexOf(fullPath.get(i))) {
             throw new IllegalMovementException("Oops! Cannot bypass or destroy a marble in its Base Cell!");
         }
 
         // Rule 3: Cannot bypass or destroy many marbles (applies to the path only, excluding the target) - Path Blockage: Movement is invalid if there is more than one marble (owned by
         // any player) blocking the path.
-        if (activeColour != marble.getColour()) {
+        if (activeColour != marbleColor) {
             count++;
             if (!destroy && count > 1 && i < size1) {
                 throw new IllegalMovementException("Oops! Cannot bypass or destroy many marbles!");
@@ -241,7 +241,10 @@ private void validatePath(Marble marble, ArrayList<Cell> fullPath, boolean destr
 
         // Rule 4: Cannot enter the Safe Zone of another marble (applies to both path and target) -  Safe Zone Entry: A marble cannot enter its player’s Safe Zone if any marble is
         //stationed at its player’s Safe Zone Entry.
-        if (!destroy && fullPath.get(i).getCellType() == CellType.ENTRY) {
+        // if (!destroy && fullPath.get(i).getCellType() == CellType.ENTRY) {
+        //     throw new IllegalMovementException("Oops! Cannot enter the Safe Zone!");
+        // }
+        if (fullPath.get(i).getCellType() == CellType.ENTRY && i + 1 < fullPath.size() && fullPath.get(i+1).getCellType() == CellType.SAFE){
             throw new IllegalMovementException("Oops! Cannot enter the Safe Zone!");
         }
 
