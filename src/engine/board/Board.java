@@ -156,18 +156,17 @@ public class Board implements BoardManager{
                 }
                 return path;
             }
-            else{
-                if(steps>movesTillEntryPosition+4) 
-                    throw new IllegalMovementException("The rank of the played card is too high");
-                for(int i=1 ; i<=movesTillEntryPosition ; i++){
-                    int index = (trackPosition+i)%100;
-                    path.add(track.get(index));
-                }
-                for(int i=0 ; i<steps-movesTillEntryPosition ; i++){
-                    path.add(getSafeZone(currentColour).get(i));
-                }
-                return path;
+            if(steps>movesTillEntryPosition+4) 
+                throw new IllegalMovementException("The rank of the played card is too high");
+            for(int i=1 ; i<=movesTillEntryPosition ; i++){
+                int index = (trackPosition+i)%100;
+                path.add(track.get(index));
             }
+            for(int i=0 ; i<steps-movesTillEntryPosition ; i++){
+                path.add(getSafeZone(currentColour).get(i));
+            }
+            return path;
+            
         }
         if(safeZonePosition!=-1){
             path.add(getSafeZone(currentColour).get(safeZonePosition));
