@@ -241,7 +241,7 @@ public class Board implements BoardManager{
                     throw new IllegalMovementException("Oops! Cannot land on a cell that is already occupied!");
                 }
             }
-    
+
             // Entry → Safe Zone check (do not allow entering if another marble blocks the entry)
             if (cellType == CellType.ENTRY && i + 1 < fullPath.size()) {
                 Cell next = fullPath.get(i + 1);
