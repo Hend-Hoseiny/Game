@@ -219,7 +219,7 @@ public class Board implements BoardManager{
                 Colour marbleColour = pathMarble.getColour();
     
                 // Rule 1: Cannot bypass or destroy your own marble
-                if (marbleColour == activeColour) {
+                if (marbleColour == activeColour && !destroy){
                     throw new IllegalMovementException("Oops! Cannot bypass or destroy your own marble!");
                 }
     
@@ -237,18 +237,25 @@ public class Board implements BoardManager{
                 }
     
                 // Rule 4: Target cell has a marble
-                if (isTarget && !destroy) {
-                    throw new IllegalMovementException("Oops! Cannot land on a cell that is already occupied!");
+                if (isTarget && !destroy && pathMarble.getColour() == activeColour) {
+                    throw new IllegalMovementException("Oops! Cannot land on a cell that is already occupied by your own marble!");
                 }
             }
 
             // Entry → Safe Zone check (do not allow entering if another marble blocks the entry)
             if (cellType == CellType.ENTRY && i + 1 < fullPath.size()) {
                 Cell next = fullPath.get(i + 1);
-                if (next.getCellType() == CellType.SAFE && next.getMarble() != null) {
+                boolean goingIntoSafe = next.getCellType() == CellType.SAFE;
+                boolean entryOccupied = cell.getMarble() != null;
+            
+                if (goingIntoSafe && entryOccupied) {
                     throw new IllegalMovementException("Oops! Cannot enter the Safe Zone! Entry is blocked.");
                 }
-            }
+            
+                if (goingIntoSafe && next.getMarble() != null) {
+                    throw new IllegalMovementException("Oops! Cannot enter the Safe Zone! Entry is blocked.");
+                }
+            }           
         }
     }
     
@@ -308,21 +315,32 @@ public class Board implements BoardManager{
     private int getIndexInTrack (Cell c){
         return track.indexOf(c);
     }
+
+
+    
     private void move(Marble marble, ArrayList<Cell> fullPath, boolean destroy) throws IllegalDestroyException{
         track.get(getIndexInTrack(fullPath.get(0))).setMarble(null);
+        
         for(int i=1 ; i<fullPath.size()-1 ; i++){
             if(destroy && fullPath.get(i).getCellType()!=CellType.SAFE)
               track.get(getIndexInTrack(fullPath.get(i))).setMarble(null);
         }
+
         int targetIndex = getIndexInTrack(fullPath.get(fullPath.size()-1));
         track.get(targetIndex).setMarble(marble);
+
         if(track.get(targetIndex).isTrap()){
             destroyMarble(marble);
             track.get(targetIndex).setTrap(false);
             assignTrapCell();
         }
 
+        
+
     }
+
+
+
     public void moveBy(Marble marble, int steps, boolean destroy) throws IllegalMovementException, IllegalDestroyException {
         ArrayList<Cell> fullPath = validateSteps(marble, steps);
         validatePath(marble, fullPath, destroy);
