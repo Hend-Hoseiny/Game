@@ -52,18 +52,32 @@ public class Burner extends Wild {
         return checkValidColours(marbles);
     }
     
-    @Override
-    public void act(ArrayList<Marble> marbles) throws ActionException,InvalidMarbleException {
+    // @Override
+    // public void act(ArrayList<Marble> marbles) throws ActionException,InvalidMarbleException {
       
-            if (!validateMarbleSize(marbles)) {
-                throw new InvalidMarbleException("Burner requires exactly 1 marble");
-            }
-            if (!validateMarbleColours(marbles)) {
-                throw new InvalidMarbleException("Burner can only target opponent marbles");
-            }
-            boardManager.destroyMarble(marbles.get(0));
+    //         if (!validateMarbleSize(marbles)) {
+    //             throw new InvalidMarbleException("Burner requires exactly 1 marble");
+    //         }
+    //         if (!validateMarbleColours(marbles)) {
+    //             throw new InvalidMarbleException("Burner can only target opponent marbles");
+    //         }
+    //         boardManager.destroyMarble(marbles.get(0));
       
-    }
+    // }
 
+    @Override
+public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
+    // Validate marble selection
+    if (!validateMarbleSize(marbles)) {
+        throw new InvalidMarbleException("Burner requires exactly 1 marble");
+    }
+    
+    try {
+        // Burner destroys the selected marble (bypasses all protections)
+        boardManager.destroyMarble(marbles.get(0));
+    } catch (Exception e) {
+        throw new ActionException("Burner card failed to destroy marble"){};
+    }
+}
 
 }
