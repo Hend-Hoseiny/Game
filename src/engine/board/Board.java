@@ -200,58 +200,58 @@ public class Board implements BoardManager{
     
     
     
-    //validate against illegal moves specified
     private void validatePath(Marble marble, ArrayList<Cell> fullPath, boolean destroy) throws IllegalMovementException {
-        int count = 0;
-        int size1 = fullPath.size() - 1;
         Colour activeColour = gameManager.getActivePlayerColour();
+        int marbleBlockCount = 0;
     
-        // ASK ABOUT THIS!!!!!!!!!!!!!!
-        for (int i = 0; i < fullPath.size() && fullPath.size()>1; i++) {
-            Marble pathMarble = fullPath.get(i).getMarble();
+        for (int i = 1; i < fullPath.size(); i++) {
+            Cell cell = fullPath.get(i);
+            Marble pathMarble = cell.getMarble();
+            boolean isTarget = (i == fullPath.size() - 1);
+            CellType cellType = cell.getCellType();
     
-            // Skip if the cell is empty
-            if (pathMarble == null) {
-                continue;
+            // Rule 5: Safe Zone protection (no card can bypass or land on marbles in Safe Zone)
+            if (cellType == CellType.SAFE && pathMarble != null) {
+                throw new IllegalMovementException("Oops! Cannot bypass or land on a marble in its Safe Zone!");
             }
     
-            Colour marbleColor = pathMarble.getColour();
+            if (pathMarble != null) {
+                Colour marbleColour = pathMarble.getColour();
     
-            // Rule 1: Cannot bypass or destroy your own marble -  Self-Blocking: A marble cannot move if there is another marble owned by the same
-            // player either in its path or at the target position.
-            if (activeColour == marbleColor && !destroy) {
-                throw new IllegalMovementException("Oops! Cannot bypass or destroy your own marble!");
-            }
+                // Rule 1: Cannot bypass or destroy your own marble
+                if (marbleColour == activeColour) {
+                    throw new IllegalMovementException("Oops! Cannot bypass or destroy your own marble!");
+                }
     
-            // Rule 2: Cannot bypass or destroy a marble in its Base Cell
-            if (fullPath.get(i).getCellType() == CellType.BASE && getBasePosition(marbleColor) == track.indexOf(fullPath.get(i))) {
-                throw new IllegalMovementException("Oops! Cannot bypass or destroy a marble in its Base Cell!");
-            }
+                // Rule 2: Cannot bypass or destroy a marble in its Base Cell
+                if (cellType == CellType.BASE && getBasePosition(marbleColour) == track.indexOf(cell)) {
+                    throw new IllegalMovementException("Oops! Cannot bypass or destroy a marble in its Base Cell!");
+                }
     
-            // Rule 3: Cannot bypass or destroy many marbles (applies to the path only, excluding the target) - Path Blockage: Movement is invalid if there is more than one marble (owned by
-            // any player) blocking the path.
-            if (activeColour != marbleColor) {
-                count++;
-                if (!destroy && count > 1 && i < size1) {
-                    throw new IllegalMovementException("Oops! Cannot bypass or destroy many marbles!");
+                // Rule 3: Cannot bypass or destroy many marbles (only applies to intermediate path, not the target)
+                if (!isTarget && !destroy) {
+                    marbleBlockCount++;
+                    if (marbleBlockCount > 1) {
+                        throw new IllegalMovementException("Oops! Cannot bypass more than one opponent marble!");
+                    }
+                }
+    
+                // Rule 4: Target cell has a marble
+                if (isTarget && !destroy) {
+                    throw new IllegalMovementException("Oops! Cannot land on a cell that is already occupied!");
                 }
             }
     
-            // Rule 4: Cannot enter the Safe Zone of another marble (applies to both path and target) -  Safe Zone Entry: A marble cannot enter its player’s Safe Zone if any marble is
-            //stationed at its player’s Safe Zone Entry.
-            // if (!destroy && fullPath.get(i).getCellType() == CellType.ENTRY) {
-            //     throw new IllegalMovementException("Oops! Cannot enter the Safe Zone!");
-            // }
-            if (fullPath.get(i).getCellType() == CellType.ENTRY && i + 1 < fullPath.size() && fullPath.get(i+1).getCellType() == CellType.SAFE){
-                throw new IllegalMovementException("Oops! Cannot enter the Safe Zone!");
-            }
-    
-            // Rule 5: Safe Zone protection (even a King cannot bypass or land on a Safe Zone marble)
-            if (fullPath.get(i).getCellType() == CellType.SAFE) {
-                throw new IllegalMovementException("Oops! Cannot bypass or land on a marble in its Safe Zone!");
+            // Entry → Safe Zone check (do not allow entering if another marble blocks the entry)
+            if (cellType == CellType.ENTRY && i + 1 < fullPath.size()) {
+                Cell next = fullPath.get(i + 1);
+                if (next.getCellType() == CellType.SAFE && next.getMarble() != null) {
+                    throw new IllegalMovementException("Oops! Cannot enter the Safe Zone! Entry is blocked.");
+                }
             }
         }
     }
+    
     
     
 
@@ -267,17 +267,21 @@ public class Board implements BoardManager{
     }
 
 
-    private void validateDestroy(int positionInPath) throws IllegalDestroyException{
-        if(positionInPath==-1)
-            throw new IllegalDestroyException("Oops! Cannot destroy a marble that is not on the track!");
-        Marble currentMarble = track.get(positionInPath).getMarble();
-        if(currentMarble==null)
-            return;
-        int marbleBasePosition = getBasePosition(currentMarble.getColour());
-        if(positionInPath==marbleBasePosition)
-            throw new IllegalDestroyException("Oops! Cannot destroy a marble in its Base Cell!");
-        
+    private void validateDestroy(int positionInPath) throws IllegalDestroyException {
+        // Case (a): Destroying a marble that isn't on the track
+        if (positionInPath == -1 || positionInPath >= track.size()) {
+            throw new IllegalDestroyException("Oops! Cannot destroy a marble that is not on the track.");
+        }
+    
+        Cell c = track.get(positionInPath);
+        if (c.getCellType() == CellType.BASE &&
+            c.getMarble() != null &&
+            getBasePosition(c.getMarble().getColour()) == positionInPath)
+            throw new IllegalDestroyException("Oops! Cannot destroy a marble in its own Base Cell!");
+        if (c.getCellType() == CellType.SAFE)
+            throw new IllegalDestroyException("Oops! Cannot destroy a marble in its Safe Zone!");
     }
+    
 
     
      //mile stone 2
@@ -342,14 +346,30 @@ public class Board implements BoardManager{
     }
 
     
-    //method 14
-    public void destroyMarble(Marble marble) throws IllegalDestroyException {
-        Cell currentCell = track.get(this.getPositionInPath(track, marble));
-        if(marble.getColour()!=gameManager.getActivePlayerColour())
-            validateDestroy(getPositionInPath(track, marble));
-        currentCell.setMarble(null);
-        gameManager.sendHome(marble);
+  // Method 14: destroyMarble
+public void destroyMarble(Marble marble) throws IllegalDestroyException {
+    // Get the marble's position in the track
+    int positionInPath = getPositionInPath(track, marble);
+
+    // Validate that this marble is eligible for destruction
+    validateDestroy(positionInPath);
+
+    // Defensive check: ensure index is valid before accessing
+    if (positionInPath >= 0 && positionInPath < track.size()) {
+        Cell currentCell = track.get(positionInPath);
+
+        // Remove the marble from the track cell
+        if (currentCell != null && currentCell.getMarble() == marble) {
+            currentCell.setMarble(null);
+        }
     }
+
+    // Send marble back to player's home (regain)
+    gameManager.sendHome(marble);
+
+    // Optional: System.out.println("Marble destroyed and returned home: " + marble);
+}
+
     
     //method 15
     

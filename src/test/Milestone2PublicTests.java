@@ -6649,45 +6649,39 @@ public class Milestone2PublicTests {
 			board_field.setAccessible(true);
 			Object board = board_field.get(game);
 
-
-			Field playerField= Class.forName(gamePath).getDeclaredField("players");
+			Field playerField = Class.forName(gamePath).getDeclaredField("players");
 			playerField.setAccessible(true);
 			ArrayList<Object> players = (ArrayList<Object>) playerField.get(game);
 
 			Object player1 = players.get(0);
 
-
 			Field playerColourField = Class.forName(playerPath).getDeclaredField("colour");
 			playerColourField.setAccessible(true);
 
-			ArrayList<Object> colours = new ArrayList<Object>();
-			for(int i=0;i<players.size();i++){
-				colours.add( playerColourField.get(players.get(i)));
+			ArrayList<Object> colours = new ArrayList<>();
+			for (Object player : players) {
+				colours.add(playerColourField.get(player));
 			}
 
-
 			int currentPlayerIndex = 0;
-			Field current_field = gameClass.getDeclaredField("currentPlayerIndex");
-			current_field.setAccessible(true);
-			current_field.set(game,currentPlayerIndex );
-
-			Field players_field = gameClass.getDeclaredField("players");
-			players_field.setAccessible(true);
-			players_field.set(game,players);
+			Field currentField = gameClass.getDeclaredField("currentPlayerIndex");
+			currentField.setAccessible(true);
+			currentField.set(game, currentPlayerIndex);
 
 			Class<?> marbleClass = Class.forName(marblePath);
 			Class<?> colourClass = Class.forName(colourPath);
-
 
 			Object redColour = Enum.valueOf((Class<Enum>) colourClass, "RED");
 
 			Constructor<?> marbleConstructor = marbleClass.getConstructor(colourClass);
 			Object marbleInstance = marbleConstructor.newInstance(redColour);
 
+			Field trackField = Class.forName(boardPath).getDeclaredField("track");
+			trackField.setAccessible(true);
+			ArrayList<Object> track = (ArrayList<Object>) trackField.get(board);
 
-			Class cell_type_class = Class.forName(cellTypePath);
+			int positionInPath = 1;
 			Constructor<?> cell_constructor = Class.forName(cellPath).getConstructor(cell_type_class);
-
 
 			Field track_field = Class.forName(boardPath).getDeclaredField("track");
 			track_field.setAccessible(true);
@@ -6699,33 +6693,27 @@ public class Milestone2PublicTests {
 			int positionInPath = 1;
 			Field marbleField = track.get(positionInPath).getClass().getDeclaredField("marble");
 			marbleField.setAccessible(true);
-			marbleField.set(track.get(positionInPath),marbleInstance);
+			marbleField.set(track.get(positionInPath), marbleInstance);
 
 			track_field.setAccessible(true);
 			track_field.set(board, track);
 
-
 			Class<?> boardClass = Class.forName(boardPath);
-			ArrayList<Object> trackreturnValue =  (ArrayList<Object>) track_field.get(board);
+			ArrayList<Object> trackreturnValue = (ArrayList<Object>) track_field.get(board);
 
-
-			Method destroyMarblemethod=Class.forName(boardPath).getDeclaredMethod("destroyMarble",  marbleClass);
+			Method destroyMarblemethod = Class.forName(boardPath).getDeclaredMethod("destroyMarble", marbleClass);
 			destroyMarblemethod.setAccessible(true);
-			destroyMarblemethod.invoke(board,marbleInstance);
+			destroyMarblemethod.invoke(board, marbleInstance);
 
 			Object m = marbleField.get(track.get(positionInPath));
 
-			assertEquals("destroyMarble method in class Board should set the position of this marble in the track to null.",null,m);
+			assertEquals("destroyMarble method in class Board should set the position of this marble in the track to null.", null, m);
 
-
-
-
-		}catch (NoSuchMethodException | SecurityException | ClassNotFoundException | 
+		} catch (NoSuchMethodException | SecurityException | ClassNotFoundException | 
 				InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchFieldException e) {
 
-			fail(e.getClass()+" occurred while accessing method destroyMarble method in class Board.");
+			fail(e.getClass() + " occurred while accessing method destroyMarble method in class Board.");
 		}
-
 	}
 
 
@@ -13645,47 +13633,46 @@ public class Milestone2PublicTests {
 		}
 			
 		@Test(timeout = 1000)
-		public void testActMethodInClassJackDoesntDestroysMarblesInPath()  {
+		public void testActMethodInClassJackDoesntDestroysMarblesInPath() {
 			try {
-			Object game = createGame();
-			Object board_object = getBoardObjectFromGame(game);
-			ArrayList<Object> track = getTrack(board_object);
+				Object game = createGame();
+				Object board_object = getBoardObjectFromGame(game);
+				ArrayList<Object> track = getTrack(board_object);
+					
+				// Create a marble
+				ArrayList<Object> marbles = new ArrayList<Object>();
+				Object marble = createMarbleForActivePlayer(game);
+				marbles.add(marble);
+			
+				// Create opponent Marble
+				Object marble2 = createOpponentMarble(game);
 				
-			// Create a marble
-			ArrayList<Object> marbles = new ArrayList<Object>();
-			Object marble = createMarbleForActivePlayer(game);
-			marbles.add(marble);
-		
-			// Create opponent Marble
-			Object marble2 = createOpponentMarble(game);
-			
-			Constructor<?> jack_constructor = Class.forName(jackPath).getConstructor(String.class, String.class, Class.forName(suitPath), Class.forName(boardManagerPath) , Class.forName(gameManagerPath));
-			Object jack_card = jack_constructor.newInstance("Jack card","description",Enum.valueOf((Class<Enum>) Class.forName(suitPath), "SPADE"), board_object, game);
+				Constructor<?> jack_constructor = Class.forName(jackPath).getConstructor(String.class, String.class, Class.forName(suitPath), Class.forName(boardManagerPath), Class.forName(gameManagerPath));
+				Object jack_card = jack_constructor.newInstance("Jack card", "description", Enum.valueOf((Class<Enum>) Class.forName(suitPath), "SPADE"), board_object, game);
 
-			
-			// Methods to get and set marbles in a cell
-		    Method setMarbleMethod= Class.forName(cellPath).getDeclaredMethod("setMarble", Class.forName(marblePath));
-		    Method getMarbleMethod= Class.forName(cellPath).getDeclaredMethod("getMarble");
-			
-			// Add the marble to cell 0 & 5 on track
-			Object Cell0 = track.get(0);
-			setMarbleMethod.invoke(Cell0, marble);
-			
-			Object Cell5 = track.get(5);
-			setMarbleMethod.invoke(Cell5, marble2);
-			
-		    
-			// Invoke jack.act 
-			Method actMethod= Class.forName(jackPath).getDeclaredMethod("act", ArrayList.class);
-			actMethod.invoke(jack_card, marbles);
-			
-			// Check position 5 didn't change
-		    assertEquals("Method act in class jack must not destroy any marbles in its path", marble2, getMarbleMethod.invoke(Cell5) );
+				
+				// Methods to get and set marbles in a cell
+				Method setMarbleMethod = Class.forName(cellPath).getDeclaredMethod("setMarble", Class.forName(marblePath));
+				Method getMarbleMethod = Class.forName(cellPath).getDeclaredMethod("getMarble");
+				
+				// Add the marble to cell 0 & 5 on track
+				Object Cell0 = track.get(0);
+				setMarbleMethod.invoke(Cell0, marble);
+				
+				Object Cell5 = track.get(5);
+				setMarbleMethod.invoke(Cell5, marble2);
+				
+				
+				// Invoke jack.act 
+				Method actMethod = Class.forName(jackPath).getDeclaredMethod("act", ArrayList.class);
+				actMethod.invoke(jack_card, marbles);
+				
+				// Check position 5 didn't change
+				assertEquals("Method act in class jack must not destroy any marbles in its path", marble2, getMarbleMethod.invoke(Cell5));
 
-			} 
-			catch(Exception e){
-				fail(e.getMessage() + e.getCause()+ " occured while accessing method act in class Jack");
-			}	
+			} catch(Exception e) {
+				fail(e.getMessage() + e.getCause() + " occurred while accessing method act in class Jack");
+			}    
 		}
 
 		@Test(timeout = 1000)
@@ -14454,7 +14441,7 @@ public class Milestone2PublicTests {
 				selected_card.set(current_player, hand.get(1));
 				
 				Method setMarbleMethod= Class.forName(cellPath).getDeclaredMethod("setMarble", Class.forName(marblePath));
-			    Method getMarbleMethod= Class.forName(cellPath).getDeclaredMethod("getMarble");
+				Method getMarbleMethod= Class.forName(cellPath).getDeclaredMethod("getMarble");
 				
 				// Create a marble
 				ArrayList<Object> marbles = new ArrayList<Object>();
@@ -14556,6 +14543,44 @@ public class Milestone2PublicTests {
 
 	
 	// //////////////////////////////////////////////////////////HELPER METHODS/////////////////////////////////////////////////////////////////
+
+	public void destroyMarble(Object marble) throws Exception {
+		if (marble == null) {
+			throw new IllegalArgumentException("Marble cannot be null");
+		}
+
+		// Find the marble's position on the track
+		Field trackField = this.getClass().getDeclaredField("track");
+		trackField.setAccessible(true);
+		ArrayList<Object> track = (ArrayList<Object>) trackField.get(this);
+
+		for (int i = 0; i < track.size(); i++) {
+			Field marbleField = track.get(i).getClass().getDeclaredField("marble");
+			marbleField.setAccessible(true);
+			if (marbleField.get(track.get(i)) == marble) {
+				// Remove the marble from the track
+				marbleField.set(track.get(i), null);
+
+				// Send the marble to the player's base
+				Field playersField = this.getClass().getDeclaredField("players");
+				playersField.setAccessible(true);
+				ArrayList<Object> players = (ArrayList<Object>) playersField.get(this);
+
+				for (Object player : players) {
+					Field marblesField = player.getClass().getDeclaredField("marbles");
+					marblesField.setAccessible(true);
+					ArrayList<Object> marbles = (ArrayList<Object>) marblesField.get(player);
+
+					if (marbles.contains(marble)) {
+						marbles.add(marble);
+						return;
+					}
+				}
+			}
+		}
+
+		throw new Exception("Marble not found on the track");
+	}
 
 
 	private Object CreateCell(String typeString) {
