@@ -132,7 +132,6 @@ public class Board implements BoardManager{
         int positionOnTrack = this.getPositionInPath(this.track, marble);
         ArrayList<Cell> stepsList = new ArrayList<>();
         Colour color = marble.getColour();
-        Colour activeColour = gameManager.getActivePlayerColour();
     
         if (positionOnTrack == -1 && this.getPositionInPath(this.getSafeZone(color), marble) == -1) 
             throw new IllegalMovementException("Oops! Marble cannot move.");
@@ -152,9 +151,6 @@ public class Board implements BoardManager{
                     ArrayList<Cell> safeZone = this.getSafeZone(color);
     
                     for (int i = 0; i < remainingSteps; i++) {
-                        // if(activeColour != color) {
-                        //     throw new IllegalMovementException("Oops! Cannot move a marble in another player's Safe Zone.");
-                        // }
                         if (i >= safeZone.size() ) {
                             throw new IllegalMovementException("Oops! Card rank is too high!");
                         }
@@ -178,10 +174,6 @@ public class Board implements BoardManager{
                 int indexInSafeZone = this.getPositionInPath(this.getSafeZone(color), marble);
                 ArrayList<Cell> safeZone = this.getSafeZone(color);
                 stepsList.add(safeZone.get(indexInSafeZone));
-    
-                // if(activeColour != color) {
-                //     throw new IllegalMovementException("Oops! Cannot move a marble in another player's Safe Zone.");
-                // }
     
                 if (steps > 0) {
                     if (steps > safeZone.size() - indexInSafeZone - 1) {
@@ -318,30 +310,6 @@ public class Board implements BoardManager{
     }
 
 
-    // private void move(Marble marble, ArrayList<Cell> fullPath, boolean destroy) throws IllegalDestroyException{
-    //     track.get(getIndexInTrack(fullPath.get(0))).setMarble(null);
-
-    //     for(int i=1 ; i<fullPath.size()-1 ; i++){
-    //         if(destroy && fullPath.get(i).getCellType()!=CellType.SAFE)
-    //           track.get(getIndexInTrack(fullPath.get(i))).setMarble(null);
-    //     }
-        
-    //     // Cell targetCell = fullPath.get(fullPath.size() - 1);
-    //     // if(!destroy && targetCell.getMarble() != null) {
-    //     //     throw new IllegalDestroyException("Target cell occupied");
-    //     // }
-        
-    //     int targetIndex = getIndexInTrack(fullPath.get(fullPath.size()-1));
-    //     track.get(targetIndex).setMarble(marble);
-
-
-    //     if(track.get(targetIndex).isTrap()){
-    //         destroyMarble(marble);
-    //         track.get(targetIndex).setTrap(false);
-    //         assignTrapCell();
-    //     }
-    // }
-
     private void move(Marble marble, ArrayList<Cell> fullPath, boolean destroy) throws IllegalDestroyException {
         // Remove marble from starting position
         track.get(getIndexInTrack(fullPath.get(0))).setMarble(null);
@@ -399,30 +367,7 @@ public class Board implements BoardManager{
         
     }
 
-    
-  // Method 14: destroyMarble
-// public void destroyMarble(Marble marble) throws IllegalDestroyException {
-//     // Get the marble's position in the track
-//     int positionInPath = getPositionInPath(track, marble);
 
-//     // Validate that this marble is eligible for destruction
-//     validateDestroy(positionInPath);
-
-//     // Defensive check: ensure index is valid before accessing
-//     if (positionInPath >= 0 && positionInPath < track.size()) {
-//         Cell currentCell = track.get(positionInPath);
-
-//         // Remove the marble from the track cell
-//         if (currentCell != null && currentCell.getMarble() == marble) {
-//             currentCell.setMarble(null);
-//         }
-//     }
-
-
-//     // Send marble back to player's home (regain)
-//     gameManager.sendHome(marble);
-
-// }
 
 public void destroyMarble(Marble marble) throws IllegalDestroyException {
     // First check track

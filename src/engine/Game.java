@@ -5,18 +5,13 @@ import exception.CannotDiscardException;
 import exception.CannotFieldException;
 import exception.IllegalDestroyException;
 import engine.board.*;
-import exception.CannotDiscardException;
-import exception.CannotFieldException;
 import exception.GameException;
-import exception.IllegalDestroyException;
 import exception.InvalidCardException;
 import exception.InvalidMarbleException;
 import exception.SplitOutOfRangeException;
 import model.Colour;
 import model.card.Card;
 import model.card.Deck;
-import model.card.standard.Standard;
-import model.card.standard.Suit;
 import model.player.CPU;
 import model.player.Marble;
 import model.player.Player;
@@ -198,11 +193,6 @@ public class Game implements GameManager {
         int index = (currentPlayerIndex+1)%4;
         return players.get(index).getColour();
     }
-
-    
-
-
-
 
 
 }

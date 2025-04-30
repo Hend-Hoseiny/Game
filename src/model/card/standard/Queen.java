@@ -1,7 +1,6 @@
 package model.card.standard;
 import java.util.ArrayList;
 import exception.*;
-import model.Colour;
 import model.player.*;
 import engine.GameManager;
 import engine.board.BoardManager;
@@ -31,7 +30,6 @@ public class Queen extends Standard {
 			boardManager.moveBy(marbles.get(0),12 , false);
 		}
         	
-        
-        
+     
  }
     }
