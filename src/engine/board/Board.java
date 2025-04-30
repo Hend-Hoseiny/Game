@@ -132,7 +132,6 @@ public class Board implements BoardManager{
         int positionOnTrack = this.getPositionInPath(this.track, marble);
         ArrayList<Cell> stepsList = new ArrayList<>();
         Colour color = marble.getColour();
-        Colour activeColour = gameManager.getActivePlayerColour();
     
         if (positionOnTrack == -1 && this.getPositionInPath(this.getSafeZone(color), marble) == -1) 
             throw new IllegalMovementException("Oops! Marble cannot move.");
