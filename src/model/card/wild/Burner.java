@@ -60,13 +60,12 @@ public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarble
     if (!validateMarbleSize(marbles)) {
         throw new InvalidMarbleException("Burner requires exactly 1 marble");
     }
-    
-    try {
-        // Burner destroys the selected marble (bypasses all protections)
-        boardManager.destroyMarble(marbles.get(0));
-    } catch (Exception e) {
-        throw new ActionException("Burner card failed to destroy marble"){};
+    if(!validateMarbleColours(marbles)){
+        throw new InvalidMarbleException("Burner cannot burn one of your own marbles");
+
     }
+    
+    boardManager.destroyMarble(marbles.get(0));
 }
 
 }

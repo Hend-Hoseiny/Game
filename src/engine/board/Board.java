@@ -132,7 +132,6 @@ public class Board implements BoardManager{
         int positionOnTrack = this.getPositionInPath(this.track, marble);
         ArrayList<Cell> stepsList = new ArrayList<>();
         Colour color = marble.getColour();
-        Colour activeColour = gameManager.getActivePlayerColour();
     
         if (positionOnTrack == -1 && this.getPositionInPath(this.getSafeZone(color), marble) == -1) 
             throw new IllegalMovementException("Oops! Marble cannot move.");
@@ -207,6 +206,8 @@ public class Board implements BoardManager{
     
             // Rule 5: Safe Zone protection (no card can bypass or land on marbles in Safe Zone)
             if (cellType == CellType.SAFE && pathMarble != null) {
+                if(pathMarble.getColour()==activeColour)
+                    throw new IllegalMovementException("Oops! Cannot bypass or destroy your own marble!");
                 throw new IllegalMovementException("Oops! Cannot bypass or land on a marble in its Safe Zone!");
             }
     
@@ -247,9 +248,6 @@ public class Board implements BoardManager{
                     throw new IllegalMovementException("Oops! Cannot enter the Safe Zone! Entry is blocked.");
                 }
             
-                if (goingIntoSafe && next.getMarble() != null) {
-                    throw new IllegalMovementException("Oops! Cannot enter the Safe Zone! Entry is blocked.");
-                }
             }           
         }
     }
@@ -312,7 +310,15 @@ public class Board implements BoardManager{
         return track.indexOf(c);
     }
 
-
+    private int countOtherMarbles(ArrayList<Cell> fullPath){
+        int count=0;
+        for(int i=1 ; i<fullPath.size() ; i++){
+            Cell cell = fullPath.get(i);
+            if(cell.getMarble()!=null && cell.getMarble().getColour()!=gameManager.getActivePlayerColour())
+                count++;
+        }
+        return count;
+    }
 
     private void move(Marble marble, ArrayList<Cell> fullPath, boolean destroy) throws IllegalDestroyException {
         // Remove marble from starting position
@@ -331,15 +337,17 @@ public class Board implements BoardManager{
     
         // Handle target cell (modified validation)
         Cell targetCell = fullPath.get(fullPath.size() - 1);
-        int targetIndex = getIndexInTrack(targetCell);
-        
+
         // Only validate target if not a King card AND not a trap cell
-        if(!destroy && targetCell.getMarble() != null && !targetCell.isTrap()) {
+        int count = countOtherMarbles(fullPath);
+        if(!destroy && targetCell.getMarble() != null && !targetCell.isTrap() && count>1) {
             throw new IllegalDestroyException("Target cell occupied");
         }
     
         // Place marble in target
-        track.get(targetIndex).setMarble(marble);
+        if(targetCell.getMarble()!=null)
+            gameManager.sendHome(targetCell.getMarble());
+        targetCell.setMarble(marble);
     
         // Handle trap cell
         if(targetCell.isTrap()) {
@@ -376,44 +384,25 @@ public class Board implements BoardManager{
 public void destroyMarble(Marble marble) throws IllegalDestroyException {
     // First check track
     int positionInPath = getPositionInPath(track, marble);
+    int positionInSafeZone = getPositionInPath(getSafeZone(marble.getColour()), marble);
+    boolean isInHome = positionInPath==-1 && positionInSafeZone==-1;
+
+    if(marble.getColour()!=gameManager.getActivePlayerColour())
+        validateDestroy(positionInPath);
+
+    if(positionInSafeZone!=-1)
+        throw new IllegalDestroyException("Cannot burn marble in its safe zone");
     
-    // If not found on track, check safe zones
-    boolean inSafeZone = false;
-    if (positionInPath == -1) {
-        for (SafeZone zone : safeZones) {
-            positionInPath = getPositionInPath(zone.getCells(), marble);
-            if (positionInPath != -1) {
-                inSafeZone = true;
-                break;
-            }
-        }
-    }
-
-    // For Burner card (which can destroy any marble), skip validation
-    if (!inSafeZone && positionInPath != -1) {
-        try {
-            validateDestroy(positionInPath);
-        } catch (IllegalDestroyException e) {
-            // Only throw if we're not handling a Burner card
-            if (!(Thread.currentThread().getStackTrace()[2].getClassName().contains("Burner"))) {
-                throw e;
-            }
-        }
-    }
-
     // Remove marble from its cell if found
     if (positionInPath != -1) {
-        Cell currentCell = inSafeZone ? 
-            getSafeZone(marble.getColour()).get(positionInPath) : 
-            track.get(positionInPath);
-            
-        if (currentCell != null && currentCell.getMarble() == marble) {
-            currentCell.setMarble(null);
-        }
+        Cell currentCell = track.get(positionInPath);
+        currentCell.setMarble(null);
+        gameManager.sendHome(marble);
     }
 
-    // Always send home (even if marble wasn't found on board)
-    gameManager.sendHome(marble);
+    if(isInHome)
+        throw new IllegalDestroyException("Cannot burn marble in home zone");
+
 }
     //method 15
     
@@ -423,8 +412,7 @@ public void destroyMarble(Marble marble) throws IllegalDestroyException {
 
         if (baseCell.getMarble() != null) {
             validateFielding(baseCell);
-            // destroyMarble(baseCell.getMarble());
-            // gameManager.sendHome(baseCell.getMarble());
+            gameManager.sendHome(baseCell.getMarble());
         }
         baseCell.setMarble(marble);
     }
