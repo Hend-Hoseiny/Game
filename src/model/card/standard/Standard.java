@@ -38,12 +38,7 @@ public class Standard extends Card {
     // ----------------------------------------------------------------------------------------------------------------------------------------------
 
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
-        if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("You can act on exactly 1 of your marbles.");
-        }
-        if (!validateMarbleColours(marbles)) {
-            throw new InvalidMarbleException("The marble selected must be of your colour.");
-        }
+        
         boardManager.moveBy(marbles.get(0), rank , false);
          
            

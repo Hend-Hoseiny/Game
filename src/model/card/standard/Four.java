@@ -12,12 +12,7 @@ public class Four extends Standard {
     // --------------------------------------------------------------------------------------------------------------------------------------------------
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
-        if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("Four requires exactly 1 marble");
-        }
-        if (!validateMarbleColours(marbles)) {
-            throw new InvalidMarbleException("Four can only move your own marble");
-        }    
+        
         boardManager.moveBy(marbles.get(0), -4, false); 
   
     }

@@ -16,12 +16,7 @@ public class Ten extends Standard {
     }
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
-        if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("Ten requires 0 or 1 marbles");
-        }
-        if (!validateMarbleColours(marbles)) {
-            throw new InvalidMarbleException("Ten can only move your marbles");
-        }
+        
         if (marbles.isEmpty()) {
             Colour nextPlayer = gameManager.getNextPlayerColour();
             gameManager.discardCard(nextPlayer); 

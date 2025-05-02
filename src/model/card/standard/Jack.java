@@ -60,16 +60,6 @@ public class Jack extends Standard {
     }
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
-        // 1. Explicit validation
-        if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("Jack requires exactly 1 or 2 marbles");
-        }
-        if (!validateMarbleColours(marbles)) {
-            throw new InvalidMarbleException(marbles.size() == 1 ? 
-                "Jack can only move your own marble" : 
-                "Swap requires one yours and one opponent's marble");
-        }
-
         if (marbles.size() == 2) {
             boardManager.swap(marbles.get(0), marbles.get(1));
         } else {

@@ -270,7 +270,7 @@ public class Board implements BoardManager{
     private void validateDestroy(int positionInPath) throws IllegalDestroyException {
         
         // Case (a): Destroying a marble that isn't on the track
-        if (positionInPath == -1 || positionInPath >= track.size()) {
+        if (positionInPath <0 || positionInPath >= track.size()) {
             throw new IllegalDestroyException("Oops! Cannot destroy a marble that is not on the track.");
         }
     
@@ -310,16 +310,6 @@ public class Board implements BoardManager{
         return track.indexOf(c);
     }
 
-    private int countOtherMarbles(ArrayList<Cell> fullPath){
-        int count=0;
-        for(int i=1 ; i<fullPath.size() ; i++){
-            Cell cell = fullPath.get(i);
-            if(cell.getMarble()!=null && cell.getMarble().getColour()!=gameManager.getActivePlayerColour())
-                count++;
-        }
-        return count;
-    }
-
     private void move(Marble marble, ArrayList<Cell> fullPath, boolean destroy) throws IllegalDestroyException {
         // Remove marble from starting position
         track.get(getIndexInTrack(fullPath.get(0))).setMarble(null);
@@ -329,24 +319,18 @@ public class Board implements BoardManager{
             Cell pathCell = fullPath.get(i);
             if(destroy && pathCell.getCellType() != CellType.SAFE) {
                 if(pathCell.getMarble() != null) {
-                    gameManager.sendHome(pathCell.getMarble());
+                    destroyMarble(pathCell.getMarble());
                 }
-                pathCell.setMarble(null);
             }
         }
     
         // Handle target cell (modified validation)
         Cell targetCell = fullPath.get(fullPath.size() - 1);
-
-        // Only validate target if not a King card AND not a trap cell
-        int count = countOtherMarbles(fullPath);
-        if(!destroy && targetCell.getMarble() != null && !targetCell.isTrap() && count>1) {
-            throw new IllegalDestroyException("Target cell occupied");
-        }
     
         // Place marble in target
         if(targetCell.getMarble()!=null)
-            gameManager.sendHome(targetCell.getMarble());
+            // gameManager.sendHome(targetCell.getMarble());
+            destroyMarble(targetCell.getMarble());
         targetCell.setMarble(marble);
     
         // Handle trap cell
@@ -412,7 +396,7 @@ public void destroyMarble(Marble marble) throws IllegalDestroyException {
 
         if (baseCell.getMarble() != null) {
             validateFielding(baseCell);
-            gameManager.sendHome(baseCell.getMarble());
+            destroyMarble(baseCell.getMarble());
         }
         baseCell.setMarble(marble);
     }

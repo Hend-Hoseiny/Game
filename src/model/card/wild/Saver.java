@@ -12,12 +12,6 @@ public class Saver extends Wild {
     
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
-        if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("Saver requires exactly 1 marble");
-        }
-        if (!validateMarbleColours(marbles)) {
-            throw new InvalidMarbleException("Saver can only save your marbles");
-        }
         boardManager.sendToSafe(marbles.get(0)); 
     }
 
