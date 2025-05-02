@@ -207,7 +207,7 @@ public class Board implements BoardManager{
             // Rule 5: Safe Zone protection (no card can bypass or land on marbles in Safe Zone)
             if (cellType == CellType.SAFE && pathMarble != null) {
                 if(pathMarble.getColour()==activeColour)
-                    throw new IllegalMovementException("Oops! Cannot bypass or destroy your own marble!");
+                    throw new IllegalMovementException("Oops! Cannot bypass or destroy your own marble in safe zone!");
                 throw new IllegalMovementException("Oops! Cannot bypass or land on a marble in its Safe Zone!");
             }
     
