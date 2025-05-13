@@ -21,12 +21,6 @@ public class King extends Standard {
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
         
-        if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("King requires exactly 0 or 1 marbles");
-        }
-        if (!validateMarbleColours(marbles)) {
-            throw new InvalidMarbleException("The marble selected must be of your colour");
-        }
         if (marbles.isEmpty()) {
             gameManager.fieldMarble();
         } else {

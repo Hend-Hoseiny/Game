@@ -56,17 +56,8 @@ public class Burner extends Wild {
 
     @Override
 public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
-    // Validate marble selection
-    if (!validateMarbleSize(marbles)) {
-        throw new InvalidMarbleException("Burner requires exactly 1 marble");
-    }
     
-    try {
-        // Burner destroys the selected marble (bypasses all protections)
-        boardManager.destroyMarble(marbles.get(0));
-    } catch (Exception e) {
-        throw new ActionException("Burner card failed to destroy marble"){};
-    }
+    boardManager.destroyMarble(marbles.get(0));
 }
 
 }

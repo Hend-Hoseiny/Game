@@ -17,12 +17,6 @@ public class Seven extends Standard {
     }
     @Override
     public void act(ArrayList<Marble> marbles) throws ActionException, InvalidMarbleException {
-        if (!validateMarbleSize(marbles)) {
-            throw new InvalidMarbleException("Seven requires exactly 1 or 2 marbles");
-        }
-        if (!validateMarbleColours(marbles)) {
-            throw new InvalidMarbleException("Seven can only move your own marbles");
-        }
 
         if (marbles.size() == 2) {
             boardManager.moveBy(marbles.get(0), boardManager.getSplitDistance(), false); 
