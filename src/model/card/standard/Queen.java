@@ -1,7 +1,6 @@
 package model.card.standard;
 import java.util.ArrayList;
 import exception.*;
-import model.Colour;
 import model.player.*;
 import engine.GameManager;
 import engine.board.BoardManager;

@@ -1,0 +1,22 @@
+package view;
+
+import javafx.application.Application;
+import javafx.scene.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+
+public class View extends Application {
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("My Application");
+        primaryStage.setScene(new Scene(new StackPane(), 300, 250));
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    
+}
