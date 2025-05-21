@@ -177,7 +177,7 @@ public class Board implements BoardManager{
                 stepsList.add(safeZone.get(indexInSafeZone));
     
     
-                if (steps > 0) {
+                if (steps >= 0) {
                     if (steps > safeZone.size() - indexInSafeZone - 1) {
                         throw new IllegalMovementException("Oops! Card rank is too high!");
                     }
