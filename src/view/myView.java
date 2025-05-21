@@ -715,7 +715,6 @@ public class myView {
 
         for (int i = 0; i < 4; i++) {
             Image image = new Image(getCardURL(game.getPlayers().get(0).getHand().get(i)));
-            System.out.println(image.getUrl());
             humanCards.get(i).setImage(image);
         }
 
@@ -781,6 +780,19 @@ public class myView {
         root.getChildren().remove(humanCards.get(cardIndex));
         humanCards.remove(cardIndex);
         arrangeHumanCards();
+       
+
+        humanCards = new ArrayList<ImageView>();
+        for (int i = 0; i < game.getPlayers().get(0).getHand().size() ; i++) {
+            // int index = colourOrder.indexOf(game.getActivePlayerColour());
+            Image image = new Image(getCardURL(game.getPlayers().get(0).getHand().get(i)));
+            ImageView x = new ImageView(image); 
+            humanCards.add(x);
+        }
+        arrangeHumanCards();
+
+
+        
         for (int i = 0; i < 4; i++) {
             stateLabel.get(i).setVisible(false);
         }
