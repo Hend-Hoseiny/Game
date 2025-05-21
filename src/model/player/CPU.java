@@ -108,6 +108,7 @@ public class CPU extends Player {
         if (cards.size() == initialHandSize)
             this.selectCard(this.getHand().get(0));
     }
+    
 
 
 }
