@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import engine.Game;
+import exception.SplitOutOfRangeException;
 import javafx.animation.FadeTransition;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -15,7 +16,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -198,6 +201,144 @@ public class myController {
                 }
             });
         }
+
+        for (int i = 0; i < 100; i++) {
+            Circle c = v.getTrackCells().get(i);
+            c.setOnMouseEntered(new EventHandler<Event>() {
+                @Override
+                public void handle(Event event) {
+                    if (v.getCurrentPlayerIndex() == 0 && c.getFill() instanceof ImagePattern) {
+                        c.setCursor(Cursor.HAND);
+                    }
+                }
+            });
+            c.setOnMouseExited(new EventHandler<Event>() {
+                @Override
+                public void handle(Event event) {
+                    c.setCursor(Cursor.DEFAULT);
+                }
+            });
+            c.setOnMouseClicked(new EventHandler<Event>() {
+                @Override
+                public void handle(Event event) {
+                    if (v.getCurrentPlayerIndex() == 0 && c.getFill() instanceof ImagePattern) {
+                        c.setCursor(Cursor.HAND);
+                        if (c.getStrokeWidth() == 1.5)
+                            c.setStrokeWidth(0);
+                        else {
+                            c.setStroke(Color.WHITE);
+                            c.setStrokeWidth(1.5);
+                        }
+                    }
+                }
+            });
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                Circle c = v.getSafeZones().get(i).get(j);
+                c.setOnMouseEntered(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        if (v.getCurrentPlayerIndex() == 0 && c.getFill() instanceof ImagePattern) {
+                            c.setCursor(Cursor.HAND);
+                        }
+                    }
+                });
+                c.setOnMouseExited(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        c.setCursor(Cursor.DEFAULT);
+                    }
+                });
+                c.setOnMouseClicked(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        if (v.getCurrentPlayerIndex() == 0 && c.getFill() instanceof ImagePattern) {
+                            c.setCursor(Cursor.HAND);
+                            if (c.getStrokeWidth() == 1.5)
+                                c.setStrokeWidth(0);
+                            else {
+                                c.setStroke(Color.WHITE);
+                                c.setStrokeWidth(1.5);
+                            }
+                        }
+                    }
+                });
+
+                Button split = v.getSplit();
+                split.setOnMouseEntered(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        if (v.getCurrentPlayerIndex() == 0) {
+                            split.setCursor(Cursor.HAND);
+                        }
+                    }
+                });
+                split.setOnMouseExited(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        split.setCursor(Cursor.DEFAULT);
+                    }
+                });
+                split.setOnMouseClicked(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        if (v.getCurrentPlayerIndex() == 0) {
+                            split.setCursor(Cursor.HAND);
+                            try{
+                                int d = Integer.parseInt(v.getSplitText().getText());
+                                v.getGame().editSplitDistance(d);;
+                            }
+                            catch(SplitOutOfRangeException e){
+                                Stage exceptionStage = new Stage();
+                                StackPane eRoot = new StackPane();
+                                Label l = new Label(e.getMessage());
+                                eRoot.getChildren().add(l);
+                                Scene scene = new Scene(eRoot,500,500);
+                                exceptionStage.setScene(scene);
+                                exceptionStage.show();
+                            }
+                            catch(Exception e){
+                                Stage exceptionStage = new Stage();
+                                StackPane eRoot = new StackPane();
+                                Label l = new Label(e.getMessage());
+                                eRoot.getChildren().add(l);
+                                Scene scene = new Scene(eRoot,500,500);
+                                exceptionStage.setScene(scene);
+                                exceptionStage.show();
+                            }
+                        }
+                    }
+                });
+
+                Button play = v.getPlay();
+                play.setOnMouseEntered(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        if (v.getCurrentPlayerIndex() == 0) {
+                            play.setCursor(Cursor.HAND);
+                        }
+                    }
+                });
+                play.setOnMouseExited(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        play.setCursor(Cursor.DEFAULT);
+                    }
+                });
+                play.setOnMouseClicked(new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        if (v.getCurrentPlayerIndex() == 0) {
+                            play.setCursor(Cursor.HAND);
+                            ArrayList<Integer> marblesIndices = getSelectedMarbles();
+                            int cardIndex = getSelectedCard();
+                        }
+                    }
+                });
+            }
+        }
+
     }
 
     private void selectCard(ImageView curr) {
@@ -207,6 +348,30 @@ public class myController {
         borderEffect.setHeight(20);
         borderEffect.setSpread(0.5); // Makes it look more like a border
         curr.setEffect(borderEffect);
+    }
+
+    private ArrayList<Integer> getSelectedMarbles() {
+        ArrayList<Integer> res = new ArrayList<Integer>();
+        for (int i = 0; i < v.getTrackCells().size(); i++) {
+            if (v.getTrackCells().get(i).getStrokeWidth() == 1.5)
+                res.add(i);
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (v.getHomeZones().get(i).get(j).getStrokeWidth() == 1.5)
+                    res.add(i);
+            }
+        }
+        return res;
+    }
+
+    private int getSelectedCard(){
+        int res=-1;
+        for(int i=0 ; i<v.getHumanCards().size() ; i++){
+            if(v.getHumanCards().get(i).getEffect()!=null && v.getHumanCards().get(i).getEffect() instanceof DropShadow)
+                res=i;
+        }
+        return res;
     }
 
     private void deSelectCard(ImageView curr) {

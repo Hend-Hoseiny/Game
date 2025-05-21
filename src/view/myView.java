@@ -98,6 +98,7 @@ public class myView {
     private Button exit = new Button();
     private Button ok = new Button();
     private TextField humanNameText = new TextField();
+    private TextField splitText = new TextField();
 
     public myView() {
         setSceneStart();
@@ -615,6 +616,7 @@ public class myView {
         fixLabelLayout(cpu3Name, 996, 103);
         root.getChildren().addAll(humanName, cpu1Name, cpu2Name, cpu3Name);
 
+
         message.setStyle("-fx-background-color: #d5ab69; " +
                 "-fx-background-radius: 15px; " +
                 "-fx-padding: 5px 10px; " +
@@ -669,6 +671,23 @@ public class myView {
         fixButtonLayout(split, 1045, 283);
         root.getChildren().addAll(play, split);
 
+        splitText.setLayoutX(1090);
+        splitText.setLayoutY(380);
+        splitText.setMaxSize(45, 40);
+        splitText.setStyle(
+                "-fx-background-color: #d5ab69;" +
+                        "-fx-background-radius: 10;" +
+                        "-fx-border-radius: 10;" +
+                        "-fx-text-fill:rgba(190, 100, 52, 0.62);" +
+                        "-fx-border-width: 2;" +
+                        "-fx-padding: 5 15;" +
+                        "-fx-font-family: 'Fantasy'; " +
+                        "-fx-font-size: 15px; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-text-fill:rgb(105, 60, 44);");
+        root.getChildren().add(splitText);
+
+
         Image backGroundMain = new Image("file:resources/images/backGroundMain.jpg");
         BackgroundImage backgroundImage = new BackgroundImage(
                 backGroundMain,
@@ -678,6 +697,10 @@ public class myView {
                 new BackgroundSize(1200, 675, true, true, true, true));
         root.setBackground(new Background(backgroundImage));
         mainScene = new Scene(root, 1200.0, 675.0);
+    }
+
+    public TextField getSplitText() {
+        return splitText;
     }
 
     public void initializaBoard() throws IOException {
@@ -705,7 +728,7 @@ public class myView {
 
     }
 
-    public int getCurrentPlayerIndex(){
+    public int getCurrentPlayerIndex() {
         return getPlayerIndex(game.getActivePlayerColour());
     }
 
@@ -745,7 +768,7 @@ public class myView {
         } else if (c instanceof Saver) {
             return "file:resources/images/saver.png";
         } else
-            return ("");
+            return "file:resources/images/cardBack.png";
     }
 
     public Scene getWelcomeScene() {
@@ -820,7 +843,6 @@ public class myView {
         iconChoices.add(c);
         welcomeRoot.getChildren().add(c);
 
-        humanNameText.setPromptText("Enter a name");
         humanNameText.setLayoutX(233);
         humanNameText.setLayoutY(311);
         humanNameText.setMinSize(381, 98);

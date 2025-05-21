@@ -130,16 +130,6 @@ public class Deck {
         return cardsPool.size();
     }
 
-    public static ArrayList<Card> getDeck(){
-        return cardsPool;
-    }
-
-    public static void main(String[] args) throws IOException {
-        Deck.loadCardPool(null, null);
-        for(int i=0; i<cardsPool.size(); i++){
-            System.out.println(cardsPool.get(i).getDescription());
-        }
-    }
 
 }
 
