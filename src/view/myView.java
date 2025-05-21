@@ -422,17 +422,17 @@ public class myView {
         curr.setFitHeight(h);
         curr.setX(x);
         curr.setY(y);
-        double centerX = curr.getX() + w / 2;
-        double centerY = curr.getY() + h / 2;
-        curr.xProperty()
-                .bind(root.widthProperty().multiply((centerX / 1200.0))
-                        .subtract(curr.fitWidthProperty().divide(2)));
-        curr.yProperty()
-                .bind(root.heightProperty().multiply((centerY / 675.0))
-                        .subtract(curr.fitHeightProperty().divide(2)));
-        curr.fitWidthProperty().bind(root.widthProperty().multiply(w / 1200.0));
-        curr.fitHeightProperty().bind(root.heightProperty().multiply(h / 675.0));
-        curr.setPreserveRatio(true);
+        // double centerX = curr.getX() + w / 2;
+        // double centerY = curr.getY() + h / 2;
+        // curr.xProperty()
+        //         .bind(root.widthProperty().multiply((centerX / 1200.0))
+        //                 .subtract(curr.fitWidthProperty().divide(2)));
+        // curr.yProperty()
+        //         .bind(root.heightProperty().multiply((centerY / 675.0))
+        //                 .subtract(curr.fitHeightProperty().divide(2)));
+        // curr.fitWidthProperty().bind(root.widthProperty().multiply(w / 1200.0));
+        // curr.fitHeightProperty().bind(root.heightProperty().multiply(h / 675.0));
+        // curr.setPreserveRatio(true);
     }
 
     private void fixCircleLayout(Circle c, AnchorPane root) {
@@ -715,6 +715,7 @@ public class myView {
 
         for (int i = 0; i < 4; i++) {
             Image image = new Image(getCardURL(game.getPlayers().get(0).getHand().get(i)));
+            System.out.println(image.getUrl());
             humanCards.get(i).setImage(image);
         }
 
@@ -754,7 +755,7 @@ public class myView {
         if (c instanceof Standard) {
             int rank = ((Standard) c).getRank();
             String suit = ((Standard) c).getSuit().toString();
-            suit.toLowerCase();
+            suit=suit.toLowerCase();
             suit += "s";
             if (rank == 11)
                 return "file:resources/images/jack of " + suit + ".png";
@@ -773,6 +774,22 @@ public class myView {
 
     public Scene getWelcomeScene() {
         return welcomeScene;
+    }
+
+    public void updateBoard(int cardIndex){
+        firePit.setImage(humanCards.get(cardIndex).getImage());
+        root.getChildren().remove(humanCards.get(cardIndex));
+        humanCards.remove(cardIndex);
+        arrangeHumanCards();
+        for (int i = 0; i < 4; i++) {
+            stateLabel.get(i).setVisible(false);
+        }
+        stateLabel.get(getPlayerIndex(game.getActivePlayerColour())).setVisible(true);
+        stateLabel.get(getPlayerIndex(game.getActivePlayerColour())).setText("Current");
+        stateLabel.get(getPlayerIndex(game.getNextPlayerColour())).setVisible(true);
+        stateLabel.get(getPlayerIndex(game.getNextPlayerColour())).setText("Next");
+
+
     }
 
     public void setSceneStart() {

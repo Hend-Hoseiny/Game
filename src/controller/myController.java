@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import engine.Game;
+import exception.InvalidCardException;
+import exception.InvalidMarbleException;
 import exception.SplitOutOfRangeException;
 import javafx.animation.FadeTransition;
 import javafx.event.Event;
@@ -23,6 +25,7 @@ import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.card.Card;
+import model.player.Player;
 import view.myView;
 
 public class myController {
@@ -264,81 +267,156 @@ public class myController {
                         }
                     }
                 });
+            }
+        }
 
-                Button split = v.getSplit();
-                split.setOnMouseEntered(new EventHandler<Event>() {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                Circle c = v.getHomeZones().get(i).get(j);
+                c.setOnMouseEntered(new EventHandler<Event>() {
                     @Override
                     public void handle(Event event) {
-                        if (v.getCurrentPlayerIndex() == 0) {
-                            split.setCursor(Cursor.HAND);
+                        if (v.getCurrentPlayerIndex() == 0 && c.getFill() instanceof ImagePattern) {
+                            c.setCursor(Cursor.HAND);
                         }
                     }
                 });
-                split.setOnMouseExited(new EventHandler<Event>() {
+                c.setOnMouseExited(new EventHandler<Event>() {
                     @Override
                     public void handle(Event event) {
-                        split.setCursor(Cursor.DEFAULT);
+                        c.setCursor(Cursor.DEFAULT);
                     }
                 });
-                split.setOnMouseClicked(new EventHandler<Event>() {
+                c.setOnMouseClicked(new EventHandler<Event>() {
                     @Override
                     public void handle(Event event) {
-                        if (v.getCurrentPlayerIndex() == 0) {
-                            split.setCursor(Cursor.HAND);
-                            try{
-                                int d = Integer.parseInt(v.getSplitText().getText());
-                                v.getGame().editSplitDistance(d);;
+                        if (v.getCurrentPlayerIndex() == 0 && c.getFill() instanceof ImagePattern) {
+                            c.setCursor(Cursor.HAND);
+                            if (c.getStrokeWidth() == 1.5)
+                                c.setStrokeWidth(0);
+                            else {
+                                c.setStroke(Color.WHITE);
+                                c.setStrokeWidth(1.5);
                             }
-                            catch(SplitOutOfRangeException e){
-                                Stage exceptionStage = new Stage();
-                                StackPane eRoot = new StackPane();
-                                Label l = new Label(e.getMessage());
-                                eRoot.getChildren().add(l);
-                                Scene scene = new Scene(eRoot,500,500);
-                                exceptionStage.setScene(scene);
-                                exceptionStage.show();
-                            }
-                            catch(Exception e){
-                                Stage exceptionStage = new Stage();
-                                StackPane eRoot = new StackPane();
-                                Label l = new Label(e.getMessage());
-                                eRoot.getChildren().add(l);
-                                Scene scene = new Scene(eRoot,500,500);
-                                exceptionStage.setScene(scene);
-                                exceptionStage.show();
-                            }
-                        }
-                    }
-                });
-
-                Button play = v.getPlay();
-                play.setOnMouseEntered(new EventHandler<Event>() {
-                    @Override
-                    public void handle(Event event) {
-                        if (v.getCurrentPlayerIndex() == 0) {
-                            play.setCursor(Cursor.HAND);
-                        }
-                    }
-                });
-                play.setOnMouseExited(new EventHandler<Event>() {
-                    @Override
-                    public void handle(Event event) {
-                        play.setCursor(Cursor.DEFAULT);
-                    }
-                });
-                play.setOnMouseClicked(new EventHandler<Event>() {
-                    @Override
-                    public void handle(Event event) {
-                        if (v.getCurrentPlayerIndex() == 0) {
-                            play.setCursor(Cursor.HAND);
-                            ArrayList<Integer> marblesIndices = getSelectedMarbles();
-                            int cardIndex = getSelectedCard();
                         }
                     }
                 });
             }
         }
 
+        Button split = v.getSplit();
+        split.setOnMouseEntered(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                if (v.getCurrentPlayerIndex() == 0) {
+                    split.setCursor(Cursor.HAND);
+                }
+            }
+        });
+        split.setOnMouseExited(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                split.setCursor(Cursor.DEFAULT);
+            }
+        });
+        split.setOnMouseClicked(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                if (v.getCurrentPlayerIndex() == 0) {
+                    split.setCursor(Cursor.HAND);
+                    try {
+                        int d = Integer.parseInt(v.getSplitText().getText());
+                        v.getGame().editSplitDistance(d);
+                    } catch (SplitOutOfRangeException e) {
+                        displayExceptionRoutine(e);
+                    } catch (Exception e) {
+                        displayExceptionRoutine(e);
+                    }
+                }
+            }
+        });
+
+        Button play = v.getPlay();
+        play.setOnMouseEntered(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                if (v.getCurrentPlayerIndex() == 0) {
+                    play.setCursor(Cursor.HAND);
+                }
+            }
+        });
+        play.setOnMouseExited(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                play.setCursor(Cursor.DEFAULT);
+            }
+        });
+        play.setOnMouseClicked(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                if (v.getCurrentPlayerIndex() == 0) {
+                    play.setCursor(Cursor.HAND);
+                    ArrayList<Integer> trackIndices = getSelectedMarblesTrack();
+                    int cardIndex = getSelectedCard();
+                    Player player = v.getGame().getPlayers().get(0);
+                    ArrayList<Card> hand = player.getHand();
+                    for (int i = 0; i < trackIndices.size(); i++) {
+                        try {
+                            player.selectMarble(
+                                    v.getGame().getBoard().getTrack().get(trackIndices.get(i)).getMarble());
+                        } catch (InvalidMarbleException e) {
+                            displayExceptionRoutine(e);
+                        }
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (v.getSafeZones().get(i).get(j).getStrokeWidth() == 1.5) {
+                                try {
+                                    player.selectMarble(v.getGame().getBoard().getSafeZones().get(i).getCells()
+                                            .get(j).getMarble());
+                                } catch (InvalidMarbleException e) {
+                                    displayExceptionRoutine(e);
+                                }
+                            }
+                        }
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (v.getHomeZones().get(i).get(j).getStrokeWidth() == 1.5) {
+                                try {
+                                    player.selectMarble(v.getGame().getPlayers().get(0).getMarbles().get(0));
+                                } catch (InvalidMarbleException e) {
+                                    displayExceptionRoutine(e);
+                                }
+                            }
+                        }
+                    }
+                    try {
+                        player.selectCard(hand.get(cardIndex));
+                    } catch (InvalidCardException e) {
+                        displayExceptionRoutine(e);
+                    }
+                    try {
+                        player.play();
+                    } catch (Exception e) {
+                        displayExceptionRoutine(e);
+                    }
+                    v.getGame().endPlayerTurn();
+                    v.updateBoard(cardIndex);
+                }
+            }
+        });
+
+    }
+
+    private void displayExceptionRoutine(Exception e) {
+        Stage exceptionStage = new Stage();
+        StackPane eRoot = new StackPane();
+        Label l = new Label(e.getMessage());
+        eRoot.getChildren().add(l);
+        Scene scene = new Scene(eRoot, 500, 500);
+        exceptionStage.setScene(scene);
+        exceptionStage.show();
     }
 
     private void selectCard(ImageView curr) {
@@ -350,26 +428,32 @@ public class myController {
         curr.setEffect(borderEffect);
     }
 
-    private ArrayList<Integer> getSelectedMarbles() {
-        ArrayList<Integer> res = new ArrayList<Integer>();
-        for (int i = 0; i < v.getTrackCells().size(); i++) {
-            if (v.getTrackCells().get(i).getStrokeWidth() == 1.5)
-                res.add(i);
-        }
+    private ArrayList<ArrayList<Integer>> getSelectedMarblesSafe() {
+        ArrayList<ArrayList<Integer>> res = new ArrayList<ArrayList<Integer>>();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (v.getHomeZones().get(i).get(j).getStrokeWidth() == 1.5)
-                    res.add(i);
+                    res.get(i).add(j);
             }
         }
         return res;
     }
 
-    private int getSelectedCard(){
-        int res=-1;
-        for(int i=0 ; i<v.getHumanCards().size() ; i++){
-            if(v.getHumanCards().get(i).getEffect()!=null && v.getHumanCards().get(i).getEffect() instanceof DropShadow)
-                res=i;
+    private ArrayList<Integer> getSelectedMarblesTrack() {
+        ArrayList<Integer> res = new ArrayList<Integer>();
+        for (int i = 0; i < v.getTrackCells().size(); i++) {
+            if (v.getTrackCells().get(i).getStrokeWidth() == 1.5)
+                res.add(i);
+        }
+        return res;
+    }
+
+    private int getSelectedCard() {
+        int res = -1;
+        for (int i = 0; i < v.getHumanCards().size(); i++) {
+            if (v.getHumanCards().get(i).getEffect() != null
+                    && v.getHumanCards().get(i).getEffect() instanceof DropShadow)
+                res = i;
         }
         return res;
     }
