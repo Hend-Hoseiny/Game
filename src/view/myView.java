@@ -1,7 +1,9 @@
 package view;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import engine.Game;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Scene;
@@ -20,6 +22,11 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import model.Colour;
+import model.card.Card;
+import model.card.standard.Standard;
+import model.card.wild.Burner;
+import model.card.wild.Saver;
 
 class Pair {
     private int x;
@@ -40,7 +47,18 @@ class Pair {
 }
 
 public class myView {
+    public ArrayList<Colour> getColourOrder() {
+        return colourOrder;
+    }
+
+    private Game game;
+    private ArrayList<Colour> colourOrder = new ArrayList<Colour>();
     private ArrayList<Integer> x_coordinates = new ArrayList<Integer>();
+
+    public Game getGame() {
+        return game;
+    }
+
     private ArrayList<Integer> y_coordinates = new ArrayList<Integer>();
     private ArrayList<Circle> trackCells = new ArrayList<Circle>();
     private ArrayList<ArrayList<Circle>> safeZones = new ArrayList<ArrayList<Circle>>();
@@ -49,12 +67,13 @@ public class myView {
     private ArrayList<Image> handImages = new ArrayList<Image>();
     private AnchorPane root = new AnchorPane();
     private AnchorPane startRoot = new AnchorPane();
+
     public Scene getStartScene() {
         return startScene;
     }
 
     private AnchorPane welcomeRoot = new AnchorPane();
-    private Scene mainScene; 
+    private Scene mainScene;
     private Scene welcomeScene;
     private Scene startScene;
     private final Pair[] cardsStartLocation = new Pair[4];
@@ -526,7 +545,6 @@ public class myView {
     }
 
     public void setSceneMain() {
-        root.setPrefSize(1200, 675);
         set_coordinates();
         setTrackCells();
         setSafeZones();
@@ -553,7 +571,7 @@ public class myView {
             }
         }
 
-        Image cardBack = new Image("file:resources/images/cardBack.jpg");
+        Image cardBack = new Image("file:resources/images/cardBack.png");
         for (int i = 0; i < 4; i++) {
             handImages.add(cardBack);
         }
@@ -565,7 +583,7 @@ public class myView {
 
         deck = new ImageView(cardBack);
         fixCardLayout(deck, 37, 519, 128, 136);
-        firePit = new ImageView(cardBack);
+        firePit = new ImageView();
         fixCardLayout(firePit, 543, 191, 110, 150);
         root.getChildren().addAll(deck, firePit);
 
@@ -615,6 +633,7 @@ public class myView {
             double leftAnchor = (newVal.doubleValue() - labelWidth) / 2;
             AnchorPane.setLeftAnchor(message, leftAnchor);
         });
+        message.setVisible(false);
         AnchorPane.setTopAnchor(message, 24.0);
         message.setPrefWidth(Region.USE_COMPUTED_SIZE);
         message.setMaxWidth(Region.USE_COMPUTED_SIZE);
@@ -658,7 +677,75 @@ public class myView {
                 BackgroundPosition.CENTER,
                 new BackgroundSize(1200, 675, true, true, true, true));
         root.setBackground(new Background(backgroundImage));
-        mainScene = new Scene(root, 1200, 675);
+        mainScene = new Scene(root, 1200.0, 675.0);
+    }
+
+    public void initializaBoard() throws IOException {
+        icons.get(0).setFill(new ImagePattern(humanIconImage));
+        String s = humanName.getText();
+        game = new Game(s);
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            Colour curr = game.getPlayers().get(i).getColour();
+            colourOrder.add(curr);
+        }
+        initializeHomeZones(colourOrder);
+
+        for (int i = 0; i < 4; i++) {
+            Image image = new Image(getCardURL(game.getPlayers().get(0).getHand().get(i)));
+            humanCards.get(i).setImage(image);
+        }
+
+        for (int i = 0; i < 4; i++) {
+            stateLabel.get(i).setVisible(false);
+        }
+        stateLabel.get(getPlayerIndex(game.getActivePlayerColour())).setVisible(true);
+        stateLabel.get(getPlayerIndex(game.getActivePlayerColour())).setText("Current");
+        stateLabel.get(getPlayerIndex(game.getNextPlayerColour())).setVisible(true);
+        stateLabel.get(getPlayerIndex(game.getNextPlayerColour())).setText("Next");
+
+    }
+
+    public int getCurrentPlayerIndex(){
+        return getPlayerIndex(game.getActivePlayerColour());
+    }
+
+    private int getPlayerIndex(Colour c) {
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            if (game.getPlayers().get(i).getColour() == c)
+                return i;
+        }
+        return -1;
+    }
+
+    private void initializeHomeZones(ArrayList<Colour> colourOrder) {
+        for (int i = 0; i < 4; i++) {
+            String curr = colourOrder.get(i).toString();
+            Image image = new Image("file:resources/images/" + curr + ".png");
+            for (int j = 0; j < 4; j++) {
+                homeZones.get(i).get(j).setFill(new ImagePattern(image));
+            }
+        }
+    }
+
+    private String getCardURL(Card c) {
+        if (c instanceof Standard) {
+            int rank = ((Standard) c).getRank();
+            String suit = ((Standard) c).getSuit().toString();
+            suit.toLowerCase();
+            suit += "s";
+            if (rank == 11)
+                return "file:resources/images/jack of " + suit + ".png";
+            if (rank == 12)
+                return "file:resources/images/queen of " + suit + ".png";
+            if (rank == 13)
+                return "file:resources/images/king of " + suit + ".png";
+            return "file:resources/images/" + rank + " of " + suit + ".png";
+        } else if (c instanceof Burner) {
+            return "file:resources/images/burner.png";
+        } else if (c instanceof Saver) {
+            return "file:resources/images/saver.png";
+        } else
+            return ("");
     }
 
     public Scene getWelcomeScene() {
@@ -666,7 +753,6 @@ public class myView {
     }
 
     public void setSceneStart() {
-        // startRoot.setPrefSize(1200, 675);
         fixButtonLayoutWelcome(start, 441, 336, startRoot);
         fixButtonLayoutWelcome(how, 441, 418, startRoot);
         fixButtonLayoutWelcome(settings, 441, 496, startRoot);
@@ -681,11 +767,10 @@ public class myView {
                 BackgroundPosition.CENTER,
                 new BackgroundSize(1200, 675, true, true, true, true));
         startRoot.setBackground(new Background(backgroundImage));
-        startScene = new Scene(startRoot,1200,675);
+        startScene = new Scene(startRoot, 1200, 675);
     }
 
     public void setSceneWelcome() {
-        // welcomeRoot.setPrefSize(1200, 675);
         Label prompt = new Label("Please choose a name and an icon");
         prompt.setStyle("-fx-background-color: #d5ab69; " +
                 "-fx-background-radius: 20px; " +
@@ -778,7 +863,7 @@ public class myView {
                 BackgroundPosition.CENTER,
                 new BackgroundSize(1200, 675, true, true, true, true));
         welcomeRoot.setBackground(new Background(backgroundImage));
-        welcomeScene = new Scene(welcomeRoot,1200,675);
+        welcomeScene = new Scene(welcomeRoot, 1200, 675);
     }
 
     public Image getHumanIconImage() {
@@ -884,6 +969,5 @@ public class myView {
     public Button getExit() {
         return exit;
     }
-
 
 }
