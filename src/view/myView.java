@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import engine.Game;
+import engine.board.Cell;
+import engine.board.CellType;
+import exception.GameException;
+import javafx.animation.PauseTransition;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Scene;
@@ -22,11 +26,15 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 import model.Colour;
 import model.card.Card;
 import model.card.standard.Standard;
 import model.card.wild.Burner;
 import model.card.wild.Saver;
+import model.player.CPU;
+import model.player.Marble;
+import model.player.Player;
 
 class Pair {
     private int x;
@@ -67,6 +75,7 @@ public class myView {
     private ArrayList<Image> handImages = new ArrayList<Image>();
     private AnchorPane root = new AnchorPane();
     private AnchorPane startRoot = new AnchorPane();
+    private ArrayList<ImageView> cpuCardCount = new ArrayList<ImageView>();
 
     public Scene getStartScene() {
         return startScene;
@@ -425,11 +434,11 @@ public class myView {
         // double centerX = curr.getX() + w / 2;
         // double centerY = curr.getY() + h / 2;
         // curr.xProperty()
-        //         .bind(root.widthProperty().multiply((centerX / 1200.0))
-        //                 .subtract(curr.fitWidthProperty().divide(2)));
+        // .bind(root.widthProperty().multiply((centerX / 1200.0))
+        // .subtract(curr.fitWidthProperty().divide(2)));
         // curr.yProperty()
-        //         .bind(root.heightProperty().multiply((centerY / 675.0))
-        //                 .subtract(curr.fitHeightProperty().divide(2)));
+        // .bind(root.heightProperty().multiply((centerY / 675.0))
+        // .subtract(curr.fitHeightProperty().divide(2)));
         // curr.fitWidthProperty().bind(root.widthProperty().multiply(w / 1200.0));
         // curr.fitHeightProperty().bind(root.heightProperty().multiply(h / 675.0));
         // curr.setPreserveRatio(true);
@@ -583,7 +592,7 @@ public class myView {
         }
 
         deck = new ImageView(cardBack);
-        fixCardLayout(deck, 37, 519, 128, 136);
+        fixCardLayout(deck, 37, 500, 120, 150);
         firePit = new ImageView();
         fixCardLayout(firePit, 543, 191, 110, 150);
         root.getChildren().addAll(deck, firePit);
@@ -615,7 +624,6 @@ public class myView {
         Label cpu3Name = new Label("CPU 3");
         fixLabelLayout(cpu3Name, 996, 103);
         root.getChildren().addAll(humanName, cpu1Name, cpu2Name, cpu3Name);
-
 
         message.setStyle("-fx-background-color: #d5ab69; " +
                 "-fx-background-radius: 15px; " +
@@ -687,6 +695,38 @@ public class myView {
                         "-fx-text-fill:rgb(105, 60, 44);");
         root.getChildren().add(splitText);
 
+        // top left
+        ImageView c2 = new ImageView(new Image("file:resources/images/back4.png"));
+        c2.setLayoutX(8);
+        c2.setLayoutY(22);
+        c2.setFitWidth(200);
+        c2.setFitHeight(166);
+
+        // bottom left
+        ImageView c1 = new ImageView(new Image("file:resources/images/back4.png"));
+        c1.setLayoutX(18);
+        c1.setLayoutY(350);
+        c1.setFitWidth(200);
+        c1.setFitHeight(166);
+
+        // bottom right
+        // ImageView c3 = new ImageView(new Image("file:resources/images/back4.png"));
+        // c3.setLayoutX(1025);
+        // c3.setLayoutY(531);
+        // c3.setFitWidth(200);
+        // c3.setFitHeight(166);
+
+        // top right
+        ImageView c3 = new ImageView(new Image("file:resources/images/back4.png"));
+        c3.setLayoutX(1025);
+        c3.setLayoutY(29);
+        c3.setFitWidth(200);
+        c3.setFitHeight(166);
+        cpuCardCount.add(c1);
+        cpuCardCount.add(c2);
+        cpuCardCount.add(c3);
+
+        root.getChildren().addAll(c1, c2, c3);
 
         Image backGroundMain = new Image("file:resources/images/backGroundMain.jpg");
         BackgroundImage backgroundImage = new BackgroundImage(
@@ -754,7 +794,7 @@ public class myView {
         if (c instanceof Standard) {
             int rank = ((Standard) c).getRank();
             String suit = ((Standard) c).getSuit().toString();
-            suit=suit.toLowerCase();
+            suit = suit.toLowerCase();
             suit += "s";
             if (rank == 11)
                 return "file:resources/images/jack of " + suit + ".png";
@@ -775,24 +815,346 @@ public class myView {
         return welcomeScene;
     }
 
-    public void updateBoard(int cardIndex){
-        firePit.setImage(humanCards.get(cardIndex).getImage());
-        root.getChildren().remove(humanCards.get(cardIndex));
-        humanCards.remove(cardIndex);
-        arrangeHumanCards();
-       
-
-        humanCards = new ArrayList<ImageView>();
-        for (int i = 0; i < game.getPlayers().get(0).getHand().size() ; i++) {
-            // int index = colourOrder.indexOf(game.getActivePlayerColour());
-            Image image = new Image(getCardURL(game.getPlayers().get(0).getHand().get(i)));
-            ImageView x = new ImageView(image); 
-            humanCards.add(x);
+    private int getFirstMarbleinHomeZone(ArrayList<Circle> home) {
+        for (int i = 0; i < home.size(); i++) {
+            if (home.get(i).getFill() instanceof ImagePattern)
+                return i;
         }
-        arrangeHumanCards();
+        return -1;
+    }
 
+    private int getFirstEmptyinHomeZone(ArrayList<Circle> home) {
+        for (int i = 0; i < home.size(); i++) {
+            if (!(home.get(i).getFill() instanceof ImagePattern))
+                return i;
+        }
+        return -1;
+    }
 
-        
+    private void setStartAndEnd(ArrayList<Cell> myFullPath, int playerIndex, boolean isTrap) {
+        Cell start = (game.getBoard().myFullPath.get(0));
+        Cell target = (game.getBoard().myFullPath.get(game.getBoard().myFullPath.size() - 1));
+        if (start.getCellType() == CellType.SAFE) {
+            int index1 = game.getBoard().getSafeZones().get(playerIndex).getCells().indexOf(start);
+            ImagePattern pattern = (ImagePattern) (safeZones.get(playerIndex).get(index1).getFill());
+            resetCell(safeZones.get(playerIndex).get(index1));
+            index1 = game.getBoard().getSafeZones().get(playerIndex).getCells().indexOf(target);
+            safeZones.get(playerIndex).get(index1).setFill(pattern);
+        } else {
+            int index1 = game.getBoard().getTrack().indexOf(start);
+            ImagePattern pattern = (ImagePattern) (trackCells.get(index1).getFill());
+            resetCell(trackCells.get(index1));
+            if (target.getCellType() == CellType.SAFE) {
+                int index2 = game.getBoard().getSafeZones().get(playerIndex).getCells().indexOf(target);
+                safeZones.get(playerIndex).get(index2).setFill(pattern);
+            } else {
+                int index2 = game.getBoard().getTrack().indexOf(target);
+                trackCells.get(index2).setFill(pattern);
+                if (isTrap) {
+                    Circle c = trackCells.get(index2);
+                    ImagePattern p = (ImagePattern) c.getFill();
+                    homeZones.get(playerIndex).get(getFirstEmptyinHomeZone(homeZones.get(playerIndex))).setFill(p);
+                    resetCell(c);
+                }
+            }
+
+        }
+    }
+
+    public void updateBoardFinal(int cardIndex) {
+        Card myCard = game.getPlayers().get(colourOrder.indexOf(game.getActivePlayerColour())).getHand().get(cardIndex);
+        Image myImage = new Image(getCardURL(myCard));
+        firePit.setImage(myImage);
+        if (colourOrder.indexOf(game.getActivePlayerColour()) == 0) {
+            root.getChildren().remove(humanCards.get(cardIndex));
+            humanCards.remove(cardIndex);
+            arrangeHumanCards();
+        }
+
+        for (int i = 0; i < 4; i++) {
+            stateLabel.get(i).setVisible(false);
+        }
+        int currIndex = colourOrder.indexOf(game.getNextPlayerColour());
+        int nextIndex = (currIndex + 1) % 4;
+        stateLabel.get(currIndex).setVisible(true);
+        stateLabel.get(currIndex).setText("Current");
+        stateLabel.get(nextIndex).setVisible(true);
+        stateLabel.get(nextIndex).setText("Next");
+
+        if (game.getBoard().myFullPath.size() > 0) {
+            int playerIndex = colourOrder.indexOf(game.getActivePlayerColour());
+            Player p = game.getPlayers().get(playerIndex);
+            ArrayList<Marble> selectedMarbles = p.returnSelectedMarbles();
+            if (selectedMarbles.size() == 1) {
+                setStartAndEnd(game.getBoard().myFullPath, playerIndex, game.getBoard().isTrap);
+            } else if (selectedMarbles.size() == 2) {
+                setStartAndEnd(game.getBoard().myFullPath, playerIndex, false);
+                setStartAndEnd(game.getBoard().myFullPathSplit, playerIndex, false);
+            }
+        }
+
+        if (game.getBoard().isFielding) {
+            int nowIndex = colourOrder.indexOf(game.getActivePlayerColour());
+            Circle homeCell = homeZones.get(nowIndex)
+                    .get(getFirstMarbleinHomeZone(homeZones.get(nowIndex)));
+            ImagePattern p = (ImagePattern) homeCell.getFill();
+            resetCell(homeCell);
+            homeCell.setStrokeWidth(0);
+            trackCells.get(0 + nowIndex * 25).setFill(p);
+        }
+
+        if (game.getBoard().swapIndices[0] != -1) {
+            Circle c1 = trackCells.get(game.getBoard().swapIndices[0]);
+            Circle c2 = trackCells.get(game.getBoard().swapIndices[1]);
+
+            if (c1.getFill() instanceof ImagePattern && c2.getFill() instanceof ImagePattern) {
+                ImagePattern p1 = (ImagePattern) c1.getFill();
+                ImagePattern p2 = (ImagePattern) c2.getFill();
+                c2.setFill(p1);
+                c1.setFill(p2);
+            }
+
+        }
+
+        for (int i = 0; i < game.getBoard().destroyIndices.size(); i++) {
+            Circle c = getTrackCells().get(game.getBoard().destroyIndices.get(i));
+            ImagePattern p = (ImagePattern) c.getFill();
+            int index = colourOrder.indexOf(game.getBoard().destroyColours.get(i));
+            homeZones.get(index).get(getFirstEmptyinHomeZone(homeZones.get(index))).setFill(p);
+            resetCell(c);
+        }
+
+        // public ArrayList<Integer> trackPathIndices = new ArrayList<Integer>();
+        // public ArrayList<Integer> safePathIndices = new ArrayList<Integer>();
+        // public int trackSteps = 0;
+        // public int safeSteps = 0;
+        // public int[] swapIndices = new int[2];
+        // public ArrayList<Integer> destroyIndices = new ArrayList<Integer>();
+        // public ArrayList<Colour> destroyColours = new ArrayList<Colour>();
+        // public boolean isFielding = false;
+        // public boolean isTrap = false;
+        // public int savingIndex=-1;
+
+        // public int discardedIndex;
+        // public Card dCard;
+        // public boolean isRefill=false;
+
+    }
+
+    public void updateBoard(int cardIndex, ArrayList<Integer> selectedMarblesTrack, ArrayList<Integer> safeZonesIndices,
+            ArrayList<Integer> safeZoneLocations, int selectedMarblesCount) {
+
+        Card myCard = game.getPlayers().get(colourOrder.indexOf(game.getActivePlayerColour())).getHand().get(cardIndex);
+        // System.out.println("Game: "+myCard.getName());
+        Image myImage = new Image(getCardURL(myCard));
+        firePit.setImage(myImage);
+        if (colourOrder.indexOf(game.getActivePlayerColour()) == 0) {
+            root.getChildren().remove(humanCards.get(cardIndex));
+            humanCards.remove(cardIndex);
+            arrangeHumanCards();
+            // System.out.println(humanCards.size());
+        }
+
+        for (int i = 0; i < 4; i++) {
+            stateLabel.get(i).setVisible(false);
+        }
+        int currIndex = colourOrder.indexOf(game.getNextPlayerColour());
+        int nextIndex = (currIndex + 1) % 4;
+        stateLabel.get(currIndex).setVisible(true);
+        stateLabel.get(currIndex).setText("Current");
+        stateLabel.get(nextIndex).setVisible(true);
+        stateLabel.get(nextIndex).setText("Next");
+
+        if (game.getBoard().myFullPath.size() > 0) {
+            if (selectedMarblesCount == 1) {
+                if (selectedMarblesTrack.size() == 1) {
+                    Circle c = trackCells.get(selectedMarblesTrack.get(0));
+                    ImagePattern p = (ImagePattern) c.getFill();
+                    resetCell(c);
+                    ArrayList<Integer> path1 = game.getBoard().trackPathIndices;
+                    ArrayList<Integer> path2 = game.getBoard().safePathIndices;
+                    int j = 0;
+                    int k = 2;
+                    // for (int i = 0; i < path1.size();) {
+                    // // PauseTransition pause = new PauseTransition(Duration.seconds(3));
+                    // // pause.setOnFinished(e -> {
+                    // // trackCells.get(path1.get(j)).setFill(p);
+                    // // });
+                    // // pause.play();
+                    // // resetCell(trackCells.get(path1.get(j)));
+                    // // j=k;
+                    // }
+                    for (int i = 0; i < path2.size(); i++) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        safeZones.get(0).get(path2.get(i)).setFill(p);
+                        try {
+                            Thread.sleep(500);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        resetCell(safeZones.get(0).get(path2.get(i)));
+                    }
+                    if (path2.size() > 0)
+                        safeZones.get(0).get(path2.get(path2.size() - 1)).setFill(p);
+                    else
+                        trackCells.get(path1.get(path1.size() - 1)).setFill(p);
+
+                } else {
+                    Circle c = trackCells.get(selectedMarblesTrack.get(0));
+                    ImagePattern p = (ImagePattern) c.getFill();
+                    resetCell(c);
+                    ArrayList<Integer> path = game.getBoard().trackPathIndices;
+                    for (int i = 0; i < path.size(); i++) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        safeZones.get(0).get(path.get(i)).setFill(p);
+                        try {
+                            Thread.sleep(500);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        resetCell(safeZones.get(0).get(path.get(i)));
+                    }
+                    safeZones.get(0).get(path.get(path.size() - 1)).setFill(p);
+                }
+            } else {
+                int trackSteps2 = game.getBoard().trackSteps;
+                int trackSteps1 = game.getBoard().trackSteps - trackSteps2;
+                int safeSteps2 = game.getBoard().safeSteps;
+                int safeSteps1 = game.getBoard().safeSteps - safeSteps2;
+
+                Circle c = trackCells.get(selectedMarblesTrack.get(0));
+                ImagePattern p = (ImagePattern) c.getFill();
+                resetCell(c);
+                ArrayList<Integer> path1 = game.getBoard().trackPathIndices;
+                ArrayList<Integer> path2 = game.getBoard().safePathIndices;
+                for (int i = 0; i < path1.size(); i++) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    trackCells.get(path1.get(i)).setFill(p);
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    resetCell(trackCells.get(path1.get(i)));
+                }
+                for (int i = 0; i < path2.size(); i++) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    safeZones.get(0).get(path2.get(i)).setFill(p);
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    resetCell(safeZones.get(0).get(path2.get(i)));
+                }
+                if (path2.size() > 0)
+                    safeZones.get(0).get(path2.get(path2.size() - 1)).setFill(p);
+                else
+                    trackCells.get(path1.get(path1.size() - 1)).setFill(p);
+            }
+
+        }
+
+        if (game.getBoard().isFielding) {
+            int nowIndex = colourOrder.indexOf(game.getActivePlayerColour());
+            Circle homeCell = homeZones.get(nowIndex)
+                    .get(getFirstMarbleinHomeZone(homeZones.get(nowIndex)));
+            ImagePattern p = (ImagePattern) homeCell.getFill();
+            resetCell(homeCell);
+            homeCell.setStrokeWidth(0);
+            trackCells.get(0 + nowIndex * 25).setFill(p);
+        }
+
+        if (game.getBoard().swapIndices[0] != -1) {
+            Circle c1 = trackCells.get(game.getBoard().swapIndices[0]);
+            Circle c2 = trackCells.get(game.getBoard().swapIndices[1]);
+
+            if (c1.getFill() instanceof ImagePattern && c2.getFill() instanceof ImagePattern) {
+                ImagePattern p1 = (ImagePattern) c1.getFill();
+                ImagePattern p2 = (ImagePattern) c2.getFill();
+                c2.setFill(p1);
+                c1.setFill(p2);
+            }
+
+        }
+
+        for (int i = 0; i < game.getBoard().destroyIndices.size(); i++) {
+            Circle c = getTrackCells().get(game.getBoard().destroyIndices.get(i));
+            ImagePattern p = (ImagePattern) c.getFill();
+            int index = colourOrder.indexOf(game.getBoard().destroyColours.get(i));
+            homeZones.get(index).get(getFirstEmptyinHomeZone(homeZones.get(index))).setFill(p);
+            resetCell(c);
+        }
+
+        // public ArrayList<Integer> trackPathIndices = new ArrayList<Integer>();
+        // public ArrayList<Integer> safePathIndices = new ArrayList<Integer>();
+        // public int trackSteps = 0;
+        // public int safeSteps = 0;
+        // public int[] swapIndices = new int[2];
+        // public ArrayList<Integer> destroyIndices = new ArrayList<Integer>();
+        // public ArrayList<Colour> destroyColours = new ArrayList<Colour>();
+        // public boolean isFielding = false;
+        // public boolean isTrap = false;
+        // public int savingIndex=-1;
+
+        // public int discardedIndex;
+        // public Card dCard;
+        // public boolean isRefill=false;
+
+    }
+
+    public void updateMainScene() {
+        fixHomeZones();
+        fixSafeZones();
+
+        for (int i = 0; i < 100; i++) {
+            Marble m = game.getBoard().getTrack().get(i).getMarble();
+            if (m == null) {
+                trackCells.get(i).setFill(null);
+                trackCells.get(i).setStroke(Color.BLACK);
+                trackCells.get(i).setStrokeWidth(1);
+                trackCells.get(i).setStyle("-fx-fill: #d5ab69");
+            } else {
+                String curr = m.getColour().toString();
+                trackCells.get(i).setStrokeWidth(1);
+                trackCells.get(i).setFill(new ImagePattern(new Image("file:resources/images/" + curr + ".png")));
+            }
+        }
+
+        for (int i = 0; i < humanCards.size(); i++) {
+            root.getChildren().remove(humanCards.get(i));
+        }
+        humanCards.clear();
+        int handSize = game.getPlayers().get(0).getHand().size();
+        for (int i = 0; i < handSize; i++) {
+            Image image = new Image(getCardURL(game.getPlayers().get(0).getHand().get(i)));
+            humanCards.add(new ImageView(image));
+            arrangeHumanCards();
+        }
+        for (int i = 0; i < humanCards.size(); i++) {
+            root.getChildren().add(humanCards.get(i));
+        }
+
+        Image image = new Image(
+                getCardURL(game.getPlayers().get(colourOrder.indexOf(game.getActivePlayerColour())).getSelectedCard()));
+        firePit.setImage(image);
+
         for (int i = 0; i < 4; i++) {
             stateLabel.get(i).setVisible(false);
         }
@@ -800,8 +1162,54 @@ public class myView {
         stateLabel.get(getPlayerIndex(game.getActivePlayerColour())).setText("Current");
         stateLabel.get(getPlayerIndex(game.getNextPlayerColour())).setVisible(true);
         stateLabel.get(getPlayerIndex(game.getNextPlayerColour())).setText("Next");
+    }
 
+    private void fixHomeZones() {
+        for (int i = 0; i < 4; i++) {
+            Colour curr = colourOrder.get(i);
+            int remaining = game.getPlayers().get(i).getMarbles().size();
+            setHomeZoneMarbles(remaining, curr, i);
+        }
+    }
 
+    private void fixSafeZones() {
+        for (int i = 0; i < 4; i++) {
+            String curr = colourOrder.get(i).toString();
+            for (int j = 0; j < 4; j++) {
+                if (game.getBoard().getSafeZones().get(i).getCells().get(j).getMarble() == null) {
+                    safeZones.get(i).get(j).setFill(null);
+                    safeZones.get(i).get(j).setStroke(Color.BLACK);
+                    safeZones.get(i).get(j).setStrokeWidth(1);
+                    safeZones.get(i).get(j).setStyle("-fx-fill: #d5ab69");
+                } else {
+                    safeZones.get(i).get(j).setStroke(Color.BLACK);
+                    safeZones.get(i).get(j).setStrokeWidth(1);
+                    safeZones.get(i).get(j)
+                            .setFill(new ImagePattern(new Image("file:resources/images/" + curr + ".png")));
+                }
+
+            }
+        }
+    }
+
+    private void setHomeZoneMarbles(int x, Colour c, int index) {
+        String curr = c.toString();
+        Image image = new Image("file:resources/images/" + curr + ".png");
+        for (int i = 0; i < 4; i++) {
+            homeZones.get(index).get(i).setFill(null);
+            homeZones.get(index).get(i).setStrokeWidth(1);
+            homeZones.get(index).get(i).setStroke(Color.BLACK);
+        }
+        for (int i = 0; i < x; i++) {
+            homeZones.get(index).get(i).setFill(new ImagePattern(image));
+        }
+    }
+
+    public void resetCell(Circle c) {
+        c.setFill(null);
+        c.setStyle("-fx-fill: #d5ab69");
+        c.setStrokeWidth(1);
+        c.setStroke(Color.BLACK);
     }
 
     public void setSceneStart() {
