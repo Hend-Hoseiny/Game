@@ -504,7 +504,7 @@ public class myController {
             // new ArrayList<>(),
             // new ArrayList<>(),
             // 0);
-            v.updateBoardFinal(cardIndex);
+               v.updateBoardFinal(cardIndex>3? cardIndex - 4 : cardIndex);
 
             v.getGame().endPlayerTurn();
 
