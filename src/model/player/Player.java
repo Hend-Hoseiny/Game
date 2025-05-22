@@ -96,11 +96,7 @@ public class Player {
         selectedCard.act(selectedMarbles);   
     }
 
-
-   
-
-
-
-
-
+    public ArrayList<Marble> returnSelectedMarbles(){
+        return this.selectedMarbles;
+    }
 }

@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import engine.Game;
+import exception.ActionException;
+import exception.GameException;
 import exception.InvalidCardException;
 import exception.InvalidMarbleException;
 import exception.SplitOutOfRangeException;
 import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
@@ -18,15 +21,44 @@ import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import model.Colour;
 import model.card.Card;
+import model.player.CPU;
+import model.player.Marble;
 import model.player.Player;
 import view.myView;
+
+class Tuple {
+    private int x;
+    private int y;
+    private boolean isHome;
+
+    protected Tuple(int x, int y, boolean isHome) {
+        this.x = x;
+        this.y = y;
+        this.isHome = isHome;
+    }
+
+    protected int getX() {
+        return x;
+    }
+
+    protected int getY() {
+        return y;
+    }
+}
 
 public class myController {
     public String getHumanName() {
@@ -357,6 +389,8 @@ public class myController {
                 if (v.getCurrentPlayerIndex() == 0) {
                     play.setCursor(Cursor.HAND);
                     ArrayList<Integer> trackIndices = getSelectedMarblesTrack();
+                    ArrayList<Tuple> selectedMarblesHome = getSelectedMarblesHome();
+                    ArrayList<Tuple> selectedMarblesSafe = getSelectedMarblesSafe();
                     int cardIndex = getSelectedCard();
                     Player player = v.getGame().getPlayers().get(0);
                     ArrayList<Card> hand = player.getHand();
@@ -366,53 +400,149 @@ public class myController {
                                     v.getGame().getBoard().getTrack().get(trackIndices.get(i)).getMarble());
                         } catch (InvalidMarbleException e) {
                             displayExceptionRoutine(e);
+                            deSelectCells();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            deSelectCells();
                         }
                     }
-                    for (int i = 0; i < 4; i++) {
-                        for (int j = 0; j < 4; j++) {
-                            if (v.getSafeZones().get(i).get(j).getStrokeWidth() == 1.5) {
-                                try {
-                                    player.selectMarble(v.getGame().getBoard().getSafeZones().get(i).getCells()
-                                            .get(j).getMarble());
-                                } catch (InvalidMarbleException e) {
-                                    displayExceptionRoutine(e);
-                                }
-                            }
+
+                    for (int i = 0; i < selectedMarblesHome.size(); i++) {
+                        try {
+                            player.selectMarble(v.getGame().getPlayers().get(selectedMarblesHome.get(i).getX())
+                                    .getMarbles().get(selectedMarblesHome.get(i).getY()));
+                        } catch (InvalidMarbleException e) {
+                            displayExceptionRoutine(e);
+                            deSelectCells();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            deSelectCells();
                         }
                     }
-                    for (int i = 0; i < 4; i++) {
-                        for (int j = 0; j < 4; j++) {
-                            if (v.getHomeZones().get(i).get(j).getStrokeWidth() == 1.5) {
-                                try {
-                                    player.selectMarble(v.getGame().getPlayers().get(0).getMarbles().get(0));
-                                } catch (InvalidMarbleException e) {
-                                    displayExceptionRoutine(e);
-                                }
-                            }
+                    for (int i = 0; i < selectedMarblesSafe.size(); i++) {
+                        try {
+                            player.selectMarble(
+                                    v.getGame().getBoard().getSafeZones().get(selectedMarblesSafe.get(i).getX())
+                                            .getCells().get(selectedMarblesSafe.get(i).getY()).getMarble());
+                        } catch (InvalidMarbleException e) {
+                            displayExceptionRoutine(e);
+                            deSelectCells();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            deSelectCells();
                         }
                     }
+
                     try {
                         player.selectCard(hand.get(cardIndex));
                     } catch (InvalidCardException e) {
                         displayExceptionRoutine(e);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+
                     try {
                         player.play();
-                    } catch (Exception e) {
+                    } catch (ActionException e) {
                         displayExceptionRoutine(e);
+                        deSelectCells();
+                    } catch (InvalidMarbleException e) {
+                        displayExceptionRoutine(e);
+                        deSelectCells();
+                    } catch (GameException e) {
+                        displayExceptionRoutine(e);
+                        deSelectCells();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        deSelectCells();
                     }
+
+                    ArrayList<Integer> safeZonesIndices = new ArrayList<Integer>();
+                    ArrayList<Integer> safeZoneLocation = new ArrayList<Integer>();
+
+                    for (int i = 0; i < selectedMarblesSafe.size(); i++) {
+                        safeZonesIndices.add(selectedMarblesSafe.get(i).getX());
+                        safeZoneLocation.add(selectedMarblesSafe.get(i).getY());
+                    }
+
+                    int selectedMarbleSizes = trackIndices.size() + safeZonesIndices.size();
+                    // v.updateBoard(cardIndex, trackIndices, safeZonesIndices, safeZoneLocation,
+                    // selectedMarbleSizes);
+                    v.updateBoardFinal(cardIndex);
+                    // System.out.println("Game: " +
+                    // v.getGame().getPlayers().get(0).getSelectedCard().getName());
                     v.getGame().endPlayerTurn();
-                    v.updateBoard(cardIndex);
+                    triggerCPUPlays();
                 }
             }
         });
 
+
+    }
+
+    private void triggerCPUPlays() {
+        runCPUPlay(1);
+    }
+
+    private void runCPUPlay(int cpuIndex) {
+        if (cpuIndex >= 4)
+            return;
+        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        pause.setOnFinished(e -> {
+            CPU cpu = (CPU) v.getGame().getPlayers().get(cpuIndex);
+            try {
+                cpu.play();
+            } catch (GameException ex) {
+                displayExceptionRoutine(ex);
+            }
+
+            int cardIndex = cpu.getHand().indexOf(cpu.getSelectedCard());
+            ArrayList<Marble> selectedMarbles = cpu.returnSelectedMarbles();
+            // v.updateBoard(
+            // cardIndex,
+            // new ArrayList<>(),
+            // new ArrayList<>(),
+            // new ArrayList<>(),
+            // 0);
+            v.updateBoardFinal(cardIndex);
+
+            v.getGame().endPlayerTurn();
+
+            runCPUPlay(cpuIndex + 1);
+        });
+        pause.play();
     }
 
     private void displayExceptionRoutine(Exception e) {
         Stage exceptionStage = new Stage();
         StackPane eRoot = new StackPane();
+        Image bgImage = new Image("file:resources/images/parchment.jpg");
+
+        // Set up BackgroundSize to cover (zoom) the image to fit the pane
+        BackgroundSize bgs = new BackgroundSize(
+                100, 100, // width and height as percentages
+                true, true, // treat width and height as percentage
+                false, true // do not contain, but cover (zoom to fill)
+        );
+        BackgroundImage bgi = new BackgroundImage(
+                bgImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                bgs);
+
+        eRoot.setBackground(new Background(bgi));
+
         Label l = new Label(e.getMessage());
+        try {
+            l.setFont(Font.font("Papyrus", 36));
+        } catch (Exception e1) {
+            l.setFont(Font.font("Serif", 36));
+        }
+        l.setTextFill(Color.SADDLEBROWN);
+        l.setLayoutX(40);
+        l.setLayoutY(100);
+
         eRoot.getChildren().add(l);
         Scene scene = new Scene(eRoot, 500, 500);
         exceptionStage.setScene(scene);
@@ -428,12 +558,45 @@ public class myController {
         curr.setEffect(borderEffect);
     }
 
-    private ArrayList<ArrayList<Integer>> getSelectedMarblesSafe() {
-        ArrayList<ArrayList<Integer>> res = new ArrayList<ArrayList<Integer>>();
+    private void deSelectCells() {
+        for (int i = 0; i < 100; i++) {
+            Circle c = v.getTrackCells().get(i);
+            c.setStrokeWidth(0);
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                Circle c = v.getSafeZones().get(i).get(j);
+                c.setStrokeWidth(0);
+
+            }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                Circle c = v.getHomeZones().get(i).get(j);
+                c.setStrokeWidth(0);
+
+            }
+        }
+    }
+
+    private ArrayList<Tuple> getSelectedMarblesHome() {
+        ArrayList<Tuple> res = new ArrayList<Tuple>();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (v.getHomeZones().get(i).get(j).getStrokeWidth() == 1.5)
-                    res.get(i).add(j);
+                    res.add(new Tuple(i, j, true));
+            }
+        }
+        return res;
+    }
+
+    private ArrayList<Tuple> getSelectedMarblesSafe() {
+        ArrayList<Tuple> res = new ArrayList<Tuple>();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (v.getSafeZones().get(i).get(j).getStrokeWidth() == 1.5)
+                    res.add(new Tuple(i, j, false));
             }
         }
         return res;
@@ -453,7 +616,7 @@ public class myController {
         for (int i = 0; i < v.getHumanCards().size(); i++) {
             if (v.getHumanCards().get(i).getEffect() != null
                     && v.getHumanCards().get(i).getEffect() instanceof DropShadow)
-                res = i;
+                return i;
         }
         return res;
     }

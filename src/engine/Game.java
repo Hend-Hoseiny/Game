@@ -73,6 +73,7 @@ public class Game implements GameManager {
         this.currentPlayerIndex = 0;
         this.turn = 0;
         this.firePit = new ArrayList<Card>();
+        
     }
 
     public Board getBoard() {
@@ -130,6 +131,8 @@ public class Game implements GameManager {
         board.savingIndex = -1;
         discardedIndex=-1;
         dCard=null;
+        board.myFullPath.clear();
+        board.myFullPathSplit.clear();
 
         Player currentPlayer = players.get(currentPlayerIndex);
         Card selectedCard = currentPlayer.getSelectedCard();

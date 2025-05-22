@@ -39,12 +39,13 @@ public class Main extends Application {
         myView v = new myView();
         myController c = new myController(primaryStage, v, v.getMainScene());
         c.setControls();
-        
+
         primaryStage.setScene(v.getStartScene());
         primaryStage.setResizable(false);
         primaryStage.setFullScreen(false);
+        primaryStage.getIcons().add(new Image("file:resources/images/gameIcon.png"));
         primaryStage.show();
+
     }
 
-    
 }

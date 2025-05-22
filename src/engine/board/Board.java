@@ -19,17 +19,20 @@ public class Board implements BoardManager {
     private final ArrayList<Cell> track;
     private final ArrayList<SafeZone> safeZones;
     private int splitDistance;
-
+    
     public ArrayList<Integer> trackPathIndices = new ArrayList<Integer>();
     public ArrayList<Integer> safePathIndices = new ArrayList<Integer>();
     public int trackSteps = 0;
     public int safeSteps = 0;
+
+    public ArrayList<Cell> myFullPath = new ArrayList<Cell>();
+    public ArrayList<Cell> myFullPathSplit = new ArrayList<Cell>();
     public int[] swapIndices = new int[2];
     public ArrayList<Integer> destroyIndices = new ArrayList<Integer>();
     public ArrayList<Colour> destroyColours = new ArrayList<Colour>();
     public boolean isFielding = false;
     public boolean isTrap = false;
-    public int savingIndex=-1;
+    public int savingIndex = -1;
 
     public Board(ArrayList<Colour> colourOrder, GameManager gameManager) {
         this.gameManager = gameManager;
@@ -347,18 +350,29 @@ public class Board implements BoardManager {
         ArrayList<Cell> fullPath = validateSteps(marble, steps);
         validatePath(marble, fullPath, destroy);
         move(marble, fullPath, destroy);
+                
+        safeSteps = 0;
+        trackSteps = 0;
         for (int i = 1; i < fullPath.size(); i++) {
             Cell pathCell = fullPath.get(i);
-            safeSteps = 0;
-            trackSteps = 0;
             isTrap = false;
             if (pathCell.getCellType() == CellType.SAFE) {
                 safePathIndices.add(getSafeZone(gameManager.getActivePlayerColour()).indexOf(pathCell));
                 safeSteps++;
             } else {
                 trackPathIndices.add(track.indexOf(pathCell));
+                trackSteps++;
             }
         }
+        
+        if(myFullPath.size()>0)
+            myFullPathSplit=fullPath;
+        else
+            myFullPath=fullPath;
+        // if (trackSteps == 0)
+        //     safeSteps--;
+        // else
+        //     trackSteps--;
     }
 
     // method 13
@@ -416,7 +430,7 @@ public class Board implements BoardManager {
             destroyMarble(baseCell.getMarble());
         }
         baseCell.setMarble(marble);
-        isFielding=true;
+        isFielding = true;
     }
 
     // method 16
